@@ -88,7 +88,23 @@ body.page-home-active .page-container { height: auto; }
 #marketView.hidden { display: none !important; }
 .v2-legacy[hidden] { display: none !important; }
 
-/* 顶栏右侧：外部跳转 + 原版版本胶囊 */
+/* 自绘标题栏（仿 BazaarPlusPlus）：图标 名称 版本 …… 链接 │ 窗口按钮。系统标题栏已在 HybridWindow.xaml 隐藏 */
+.global-header, body.page-home-active .global-header { justify-content: flex-start; padding-right: 0; cursor: default; user-select: none; }
+.brand-section { cursor: default; }
+.app-version-chip { background: none !important; border: 0 !important; box-shadow: none !important; padding: 0 2px !important; height: auto; color: var(--gp-text-muted); font-size: 12px; font-weight: 400; cursor: pointer; }
+.app-version-chip:hover { color: #fff; }
+.app-version-chip svg { display: none; }
+.app-version-chip .app-version-chip-value, .app-version-chip .app-version-chip-commit { font-weight: 400; color: inherit; }
+.v2-winbtns { display: flex; align-self: stretch; margin-left: 6px; }
+.v2-win { width: 46px; height: 100%; display: grid; place-items: center; color: var(--gp-text-sub); border-radius: 0; }
+.v2-win svg { width: 10px; height: 10px; fill: none; stroke: currentColor; stroke-width: 1; }
+.v2-win:hover { background: rgba(255, 255, 255, .08); color: #fff; }
+.v2-win.close:hover { background: #c42b1c; color: #fff; }
+.v2-win .restore { display: none; }
+body.v2-maximized .v2-win .max { display: none; }
+body.v2-maximized .v2-win .restore { display: block; }
+
+/* 顶栏右侧：外部跳转 */
 .v2-top-spacer { flex: 1; }
 .v2-tb-btn { display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 8px; border-radius: 6px; color: var(--gp-text-sub); font-size: 13px; }
 .v2-tb-btn:hover { background: var(--v2-hover); color: #fff; }

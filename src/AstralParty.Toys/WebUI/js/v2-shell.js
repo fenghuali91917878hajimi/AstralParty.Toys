@@ -153,12 +153,34 @@
       <div class="v2-jump"><button class="v2-tb-btn" data-v2jump="wiki">${ICON.book}攻略</button><div class="v2-jump-tip" role="status" aria-live="polite"></div></div>
       <div class="v2-jump"><button class="v2-tb-btn" data-v2jump="github">${ICON.ext}GitHub</button><div class="v2-jump-tip" role="status" aria-live="polite"></div></div>
       <div class="v2-tb-sep"></div>`;
+    // 布局（仿 BazaarPlusPlus）：图标 名称 版本 …… 攻略 GitHub │ 最小化 最大化 关闭
+    const brand = header.querySelector('.brand-section');
+    if (brand && chip) brand.after(chip);
     const spacer = document.createElement('div'); spacer.className = 'v2-top-spacer';
-    header.insertBefore(spacer, chip);
-    header.insertBefore(box, chip);
+    const win = document.createElement('div');
+    win.className = 'v2-winbtns';
+    win.innerHTML = `
+      <button class="v2-win" data-v2win="windowMinimize" title="最小化" aria-label="最小化"><svg viewBox="0 0 10 10"><path d="M0 5h10"/></svg></button>
+      <button class="v2-win" data-v2win="windowToggleMaximize" title="最大化" aria-label="最大化"><svg viewBox="0 0 10 10" class="max"><rect x="0.5" y="0.5" width="9" height="9"/></svg>
+        <svg viewBox="0 0 10 10" class="restore"><path d="M2.5 2.5V0.5h7v7h-2"/><rect x="0.5" y="2.5" width="7" height="7"/></svg></button>
+      <button class="v2-win close" data-v2win="windowClose" title="关闭" aria-label="关闭"><svg viewBox="0 0 10 10"><path d="M0 0l10 10M10 0L0 10"/></svg></button>`;
+    header.append(spacer, box, win);
     box.addEventListener('click', e => { const b = e.target.closest('[data-v2jump]'); if (b) jumpClick(b); });
+    win.addEventListener('click', e => { const b = e.target.closest('[data-v2win]'); if (b) post({ type: b.dataset.v2win }); });
     document.addEventListener('pointerdown', e => { if (!e.target.closest?.('.v2-jump')) jumpCancelArmed(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape') { jumpCancelArmed(); closeMenu(); } });
+
+    // 拖动顶栏空白处移动窗口；双击最大化 / 还原。
+    // 按下后宿主马上接管鼠标（系统的拖动循环），网页收不到 dblclick，所以自己按两次按下的间隔判断双击。
+    let lastDown = 0, lastX = 0, lastY = 0;
+    header.addEventListener('mousedown', e => {
+      if (e.button !== 0 || e.target.closest('button, a, input, select, textarea, .v2-jump-tip')) return;
+      const now = Date.now(), dbl = now - lastDown < 400 && Math.abs(e.screenX - lastX) < 6 && Math.abs(e.screenY - lastY) < 6;
+      lastDown = dbl ? 0 : now; lastX = e.screenX; lastY = e.screenY;
+      e.preventDefault();
+      post({ type: dbl ? 'windowToggleMaximize' : 'windowDrag' });
+    });
+    post({ type: 'windowStateGet' });
   }
 
   /* ---------- 概览 ---------- */
@@ -354,6 +376,13 @@
     const msg = event.data;
     if (!msg?.type) return;
     switch (msg.type) {
+      case 'windowState': {
+        // 最大化时按钮换成「还原」图标
+        document.body.classList.toggle('v2-maximized', !!msg.maximized);
+        const b = document.querySelector('[data-v2win="windowToggleMaximize"]');
+        if (b) { b.title = msg.maximized ? '还原' : '最大化'; b.setAttribute('aria-label', b.title); }
+        return;
+      }
       case 'modStatus': V2.modStatus = msg.payload?.status ?? msg.payload; break;
       case 'skinsProfiles': V2.skins = msg.payload; break;
       case 'characterSkins': V2.chars = msg.payload; break;
