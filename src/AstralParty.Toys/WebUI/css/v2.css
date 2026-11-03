@@ -1,0 +1,183 @@
+/* v2.css — 新界面（重做第一阶段：外壳 + 概览）
+   放在所有原版样式之后加载，只覆盖外壳布局；新组件一律用 v2- 前缀，避免和原版类名撞车。
+   配色沿用 base.css 的 --gp-* 变量。 */
+
+:root {
+  --v2-top: 44px;
+  --v2-side: 64px;
+  --v2-panel: #1a1d2e;
+  --v2-panel-2: #20243a;
+  --v2-hover: rgba(255, 255, 255, 0.05);
+  --v2-border: rgba(255, 255, 255, 0.08);
+  --v2-border-strong: rgba(255, 255, 255, 0.15);
+  --v2-pink-soft: rgba(255, 23, 118, 0.14);
+  --v2-mono: "Cascadia Mono", Consolas, monospace;
+}
+
+/* ---------- 外壳：顶栏常驻，导航改为左侧图标栏 ---------- */
+.app-shell { background: var(--gp-bg); }
+
+.global-header,
+body.page-home-active .global-header {
+  height: var(--v2-top);
+  flex: 0 0 var(--v2-top);
+  padding: 0 12px;
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+  overflow: visible;
+  background: var(--gp-bg);
+  backdrop-filter: none;
+  border-bottom: 1px solid var(--v2-border);
+  box-shadow: none;
+  gap: 10px;
+}
+body.page-home-active .page-container { height: auto; }
+
+.brand-section { gap: 10px; }
+.brand-section:hover { transform: none; }
+.brand-logo { width: 24px; height: 24px; border-radius: 6px; border: 0; font-size: 13px; box-shadow: none; }
+.brand-text h1 { font-size: 14px; font-weight: 700; letter-spacing: 0.02em; text-shadow: none; }
+.brand-text small { display: none; }
+
+.nav-breadcrumbs {
+  position: fixed;
+  top: var(--v2-top);
+  left: 0;
+  bottom: 0;
+  width: var(--v2-side);
+  z-index: 90;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 0;
+  background: #161927;
+  border-right: 1px solid var(--v2-border);
+}
+.nav-crumb-btn {
+  width: 52px;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 0 5px;
+  border-radius: 8px;
+  border: 0;
+  background: none;
+  color: var(--gp-text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.nav-crumb-btn .nav-ico { width: 20px; height: 20px; }
+.nav-crumb-btn:hover { background: var(--v2-hover); color: #fff; border: 0; transform: none; }
+.nav-crumb-btn.active { background: var(--v2-pink-soft); color: var(--gp-pink); border: 0; box-shadow: none; }
+/* 顺序：概览 回放 模组 市场 皮肤 … 设置（沉底）；维基改成顶栏的外部链接 */
+.nav-crumb-btn[data-page="home"] { order: 1; }
+.nav-crumb-btn[data-page="tools"] { order: 2; }
+.nav-crumb-btn[data-page="mods"] { order: 3; }
+.nav-crumb-btn[data-page="market"] { order: 4; }
+.nav-crumb-btn[data-page="skins"] { order: 5; }
+.nav-crumb-btn[data-page="settings"] { order: 99; margin-top: auto; }
+.nav-crumb-btn[data-page="wiki"] { display: none; }
+
+.page-container { margin-left: var(--v2-side); flex: 1 1 auto; height: auto; min-height: 0; }
+
+/* 新页面所在的 page-view 自己滚动；原版大厅的全屏背景、扫光去掉 */
+#homeView.in-game-lobby { height: 100%; display: block; overflow-y: auto; background: var(--gp-bg); }
+#homeView.in-game-lobby::before, #homeView.in-game-lobby::after { display: none; }
+#marketView { display: block; overflow-y: auto; }
+#marketView.hidden { display: none !important; }
+.v2-legacy[hidden] { display: none !important; }
+
+/* 顶栏右侧：外部跳转 + 原版版本胶囊 */
+.v2-top-spacer { flex: 1; }
+.v2-tb-btn { display: flex; align-items: center; gap: 6px; height: 28px; padding: 0 8px; border-radius: 6px; color: var(--gp-text-sub); font-size: 13px; }
+.v2-tb-btn:hover { background: var(--v2-hover); color: #fff; }
+.v2-tb-btn svg { width: 16px; height: 16px; }
+.v2-tb-sep { width: 1px; height: 16px; background: var(--v2-border-strong); }
+
+/* 外部跳转：点一次待确认，再点才打开；两次点击至少隔 0.5 秒 */
+.v2-jump { position: relative; }
+.v2-jump .v2-tb-btn.armed { color: var(--gp-pink); background: var(--v2-pink-soft); box-shadow: inset 0 0 0 1px rgba(255, 23, 118, .5); }
+.v2-jump .v2-tb-btn.gap { opacity: .6; cursor: default; }
+.v2-jump-tip { position: absolute; top: calc(100% + 8px); left: 50%; transform: translate(-50%, -4px); opacity: 0; pointer-events: none;
+  z-index: 200; white-space: nowrap; padding: 7px 10px 9px; border-radius: 8px; background: #23273d; border: 1px solid var(--v2-border-strong);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, .45); font-size: 12px; color: var(--gp-text-sub); text-align: center; transition: opacity .15s, transform .15s; overflow: hidden; }
+.v2-jump-tip.show { opacity: 1; transform: translate(-50%, 0); }
+.v2-jump-tip b { color: #fff; font-weight: 600; }
+.v2-jump-tip.done, .v2-jump-tip.done b { color: var(--gp-green); }
+.v2-jump-tip .url { display: block; color: var(--gp-text-muted); font-family: var(--v2-mono); font-size: 11px; margin-top: 1px; }
+.v2-jump-tip .bar { position: absolute; left: 0; bottom: 0; height: 2px; width: 100%; background: var(--gp-pink); transform-origin: left; animation: v2-bar linear forwards; }
+@keyframes v2-bar { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+
+/* ---------- 新页面通用组件 ---------- */
+.v2-page { max-width: 880px; margin: 0 auto; padding: 24px 28px 40px; color: #f3f5fa; font-size: 14px; line-height: 1.5; }
+.v2-head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; min-height: 36px; }
+.v2-head h1 { font-size: 22px; margin: 0; font-weight: 700; }
+.v2-card { background: var(--v2-panel); border: 1px solid var(--v2-border); border-radius: 10px; margin-bottom: 14px; }
+.v2-hero { display: flex; align-items: center; gap: 14px; padding: 18px; }
+.v2-hero-art { width: 56px; height: 56px; border-radius: 10px; flex: none; overflow: hidden; display: grid; place-items: center;
+  background: linear-gradient(135deg, var(--gp-pink), #a855f7); color: #fff; font-size: 24px; }
+.v2-hero-art img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.v2-hero-text { flex: 1; min-width: 0; }
+.v2-hero-title { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 600; }
+.v2-hero-sub { color: var(--gp-text-muted); font-size: 13px; margin-top: 2px; }
+.v2-row { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-top: 1px solid var(--v2-border); min-height: 48px; }
+.v2-card > .v2-row:first-child { border-top: 0; }
+.v2-row .k { width: 110px; color: var(--gp-text-muted); flex: none; }
+.v2-row .v { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v2-row .v.mono { font-family: var(--v2-mono); font-size: 13px; }
+.v2-row.link { cursor: pointer; }
+.v2-row.link:hover { background: var(--v2-hover); }
+.v2-row .chev { color: var(--gp-text-muted); width: 18px; height: 18px; }
+.v2-muted { color: var(--gp-text-muted); }
+
+.v2-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500; padding: 1px 8px; border-radius: 999px; background: rgba(163, 230, 53, .12); color: var(--gp-green); }
+.v2-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.v2-badge.warn { background: rgba(250, 204, 21, .12); color: var(--gp-gold); }
+.v2-badge.off { background: rgba(148, 163, 184, .12); color: var(--gp-text-muted); }
+.v2-badge.pink { background: var(--v2-pink-soft); color: var(--gp-pink); }
+.v2-tag { font-size: 12px; padding: 1px 7px; border-radius: 4px; background: var(--v2-panel-2); color: var(--gp-text-sub); font-weight: 400; }
+
+.v2-btn { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px; border-radius: 8px; font-weight: 500; white-space: nowrap; color: var(--gp-text-sub); }
+.v2-btn svg { width: 16px; height: 16px; }
+.v2-btn.primary { background: var(--gp-pink); color: #fff; }
+.v2-btn.primary:hover:not(:disabled) { background: var(--gp-pink-hover); }
+.v2-btn.big { height: 40px; padding: 0 18px; font-size: 15px; }
+.v2-btn.ghost:hover:not(:disabled) { background: var(--v2-hover); color: #fff; }
+.v2-btn.line { border: 1px solid var(--v2-border-strong); }
+.v2-btn.line:hover:not(:disabled) { background: var(--v2-hover); color: #fff; }
+.v2-btn:disabled { opacity: .6; cursor: default; }
+.v2-icon-btn { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 8px; color: var(--gp-text-muted); }
+.v2-icon-btn:hover { background: var(--v2-hover); color: #fff; }
+.v2-icon-btn svg { width: 18px; height: 18px; }
+.v2-split { display: inline-flex; }
+.v2-split .v2-btn:first-child { border-radius: 8px 0 0 8px; }
+.v2-split .v2-btn:last-child { border-radius: 0 8px 8px 0; padding: 0 8px; border-left: 1px solid rgba(0, 0, 0, .25); }
+
+details.v2-card > summary { list-style: none; display: flex; align-items: center; padding: 14px 18px; cursor: pointer; }
+details.v2-card > summary::-webkit-details-marker { display: none; }
+details.v2-card > summary .t { flex: 1; }
+details.v2-card > summary .t b { display: block; font-weight: 600; }
+details.v2-card > summary .t small { color: var(--gp-text-muted); font-size: 13px; }
+details.v2-card > summary svg { width: 18px; height: 18px; color: var(--gp-text-muted); transition: transform .15s; }
+details.v2-card[open] > summary svg { transform: rotate(180deg); }
+.v2-adv .v2-row .n { width: 140px; flex: none; }
+.v2-adv .v2-row .d { flex: 1; color: var(--gp-text-muted); font-size: 13px; }
+
+.v2-menu { position: fixed; z-index: 300; min-width: 200px; padding: 4px; background: #23273d; border: 1px solid var(--v2-border-strong); border-radius: 10px; box-shadow: 0 12px 32px rgba(0, 0, 0, .5); display: none; }
+.v2-menu.show { display: block; }
+.v2-menu button { display: flex; align-items: center; gap: 10px; width: 100%; height: 34px; padding: 0 10px; border-radius: 6px; color: var(--gp-text-sub); text-align: left; font-size: 14px; }
+.v2-menu button svg { width: 16px; height: 16px; flex: none; }
+.v2-menu button:hover:not(:disabled) { background: var(--v2-hover); color: #fff; }
+.v2-menu button:disabled { opacity: .4; cursor: default; }
+.v2-menu hr { border: 0; border-top: 1px solid var(--v2-border); margin: 4px 0; }
+
+/* ---------- 市场占位 ---------- */
+.v2-coming { padding: 48px 24px; text-align: center; }
+.v2-coming-icon { width: 72px; height: 72px; margin: 0 auto 14px; border-radius: 20px; display: grid; place-items: center; background: var(--v2-pink-soft); color: var(--gp-pink); }
+.v2-coming-icon svg { width: 34px; height: 34px; }
+.v2-coming h2 { margin: 0 0 8px; font-size: 24px; }
+.v2-coming p { margin: 0 auto 8px; max-width: 420px; color: var(--gp-text-sub); }
+
+@media (prefers-reduced-motion: reduce) { .v2-jump-tip, .v2-jump-tip .bar { animation: none; transition: none; } }
+body.reduce-motion .v2-jump-tip, body.reduce-motion .v2-jump-tip .bar { animation: none; transition: none; }

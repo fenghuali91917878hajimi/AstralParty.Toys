@@ -13,7 +13,7 @@
     'zh-Hans': {
       // Nav
       'nav.brand_sub': 'REPLAY & COMPANION TOOLBOX',
-      'nav.home': '游戏大厅',
+      'nav.home': '概览',
       'nav.replays': '回放',
       'nav.mods': '模组',
       'nav.skins': '皮肤',
@@ -400,7 +400,7 @@
     'en': {
       // Nav
       'nav.brand_sub': 'REPLAY & COMPANION TOOLBOX',
-      'nav.home': 'Lobby',
+      'nav.home': 'Overview',
       'nav.replays': 'Replays',
       'nav.mods': 'Mods',
       'nav.skins': 'Skins',
@@ -786,7 +786,7 @@
     'ja': {
       // Nav
       'nav.brand_sub': 'REPLAY & COMPANION TOOLBOX',
-      'nav.home': 'ロビー',
+      'nav.home': '概要',
       'nav.replays': 'リプレイ',
       'nav.mods': 'Mod管理',
       'nav.skins': 'スキン',
@@ -1172,7 +1172,7 @@
     'zh-Hant': {
       // Nav
       'nav.brand_sub': 'REPLAY & COMPANION TOOLBOX',
-      'nav.home': '遊戲大廳',
+      'nav.home': '概覽',
       'nav.replays': '回放',
       'nav.mods': '模組',
       'nav.skins': '皮膚',

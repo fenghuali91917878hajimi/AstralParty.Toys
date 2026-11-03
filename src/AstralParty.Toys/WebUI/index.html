@@ -17,6 +17,8 @@
     <link rel="stylesheet" href="css/workshop.css" />
     <link rel="stylesheet" href="css/skins.css" />
     <link rel="stylesheet" href="css/resource-mods.css" />
+    <!-- 新界面（重做）：放最后，覆盖外壳布局 -->
+    <link rel="stylesheet" href="css/v2.css" />
   </head>
   <body>
     <div class="app-shell">
@@ -45,7 +47,7 @@
               <path
                 d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z"
               /></svg
-            ><span data-i18n="nav.home">游戏大厅</span>
+            ><span data-i18n="nav.home">概览</span>
           </button>
           <button class="nav-crumb-btn" data-page="tools">
             <svg class="nav-ico" viewBox="0 -960 960 960" aria-hidden="true">
@@ -61,7 +63,8 @@
               /></svg
             ><span data-i18n="nav.mods">模组</span>
           </button>
-          <button class="nav-crumb-btn" data-page="workshop">
+          <!-- 新界面：市场先指向占位页（原版 workshopView 保留未删） -->
+          <button class="nav-crumb-btn" data-page="market">
             <svg class="nav-ico" viewBox="0 -960 960 960" aria-hidden="true">
               <path
                 d="m760-600-50-110-110-50 110-50 50-110 50 110 110 50-110 50-50 110Zm0 560-50-110-110-50 110-50 50-110 50 110 110 50-110 50-50 110ZM360-160 260-380 40-480l220-100 100-220 100 220 220 100-220 100-100 220Zm0-194 40-86 86-40-86-40-40-86-40 86-86 40 86 40 40 86Zm0-126Z"
@@ -133,6 +136,9 @@
       <main class="page-container">
         <!-- 1. HOME VIEW (In-Game Aesthetic Main Lobby) -->
         <section id="homeView" class="page-view home-page in-game-lobby">
+          <!-- 新界面：概览由 js/v2-shell.js 渲染。原版大厅保留并隐藏，启动等逻辑仍由 home.js 驱动 -->
+          <div id="v2Home"></div>
+          <div class="v2-legacy" hidden>
           <img
             class="lobby-game-logo"
             src="images/astral-party-logo.png"
@@ -327,7 +333,11 @@
               </button>
             </nav>
           </footer>
+          </div><!-- /.v2-legacy -->
         </section>
+
+        <!-- 新界面：市场占位页 -->
+        <section id="marketView" class="page-view hidden"><div id="v2Market"></div></section>
 
         <!-- 2. TOOLS VIEW (Replay Tool Integrated) -->
         <section id="toolsView" class="page-view tools-page hidden">
@@ -2392,5 +2402,6 @@
     <script src="js/resource-mods.js"></script>
     <script src="js/skin-crop.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/v2-shell.js"></script>
   </body>
 </html>
