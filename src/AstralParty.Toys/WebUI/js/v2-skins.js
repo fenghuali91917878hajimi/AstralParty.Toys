@@ -140,7 +140,11 @@
       <span class="v2-muted">${Math.round((X.progress || 0) * 100)}%</span><br><span class="v2-muted">${esc(X.message || '')}</span>
       <div class="v2-bar" style="max-width:none;margin-top:8px"><div style="width:${(X.progress || 0) * 100}%"></div></div></div>`;
     if (!aItems().length || extracted()) return '';
-    return `<div class="v2-notice">${I().info}<span style="flex:1">想<b>试听原版</b>，要先把游戏里的原版音频整理出来（只需要做一次）</span>
+    // 实测（1.3.2）：「从游戏提取」并不真的解包游戏，只从作者事先导出的 audio-export 文件夹复制；找不到就是 0 个
+    if (K.extractEmpty) return `<div class="v2-notice">${I().info}<span style="flex:1">刚才提取到 <b>0 个</b>：你电脑上没有作者事先导出的 audio-export 文件夹，
+      所以暂时<b>听不了原版</b>。替换、静音、调音量都不受影响。</span>
+      <button class="v2-btn line" data-v2s="audioPrep">了解详情…</button></div>`;
+    return `<div class="v2-notice">${I().info}<span style="flex:1">暂时<b>听不了原版</b>：需要事先导出好的原版音频（替换、静音、调音量都不受影响）</span>
       <button class="v2-btn line" data-v2s="audioPrep">准备原版音频…</button></div>`;
   }
 
@@ -217,12 +221,17 @@
     U().openModal(`
       <div class="v2-modal-head"><b>准备原版音频</b><button class="v2-icon-btn" data-v2modal="close">${I().x}</button></div>
       <div style="padding:16px 18px">
-        <p style="margin:0 0 10px">把游戏里的原版音频（约 1,300 个）整理到游戏目录的 <span style="font-family:var(--v2-mono)">audio-cache\\</span>，之后每一条都能「试听原版」对比。只需要做一次，游戏更新后再整理一次即可。</p>
-        <ul class="v2-confirm-lines" style="margin:0"><li>包括界面、掷骰、战斗、卡牌、角色语音和背景音乐</li>
-          <li>从游戏提取要等一会儿；已经有<b>原版音频包 ZIP</b> 的话，直接导入更快</li></ul></div>
-      <div class="v2-modal-foot"><button class="v2-btn ghost" data-v2modal="close">取消</button><span class="v2-top-spacer"></span>
+        <p style="margin:0 0 10px">想「试听原版」，要先把约 1,300 个原版音频放进游戏目录的 <span style="font-family:var(--v2-mono)">AstralParty_ModLoader\\audio-cache\\</span>。</p>
+        <div class="v2-notice" style="margin:0 0 10px">${I().info}<span><b>目前的限制：</b>原版程序的「从游戏提取」其实<b>不会解包游戏</b>，
+          只会从一个事先导出好的 <span style="font-family:var(--v2-mono)">audio-export</span> 文件夹里复制。作者没有公开这个文件夹，也没有公开原版音频包，
+          所以在大多数电脑上会提取到 0 个。</span></div>
+        <ul class="v2-confirm-lines" style="margin:0">
+          <li>如果你从别处拿到了别人导出的 <b>audio-export</b> 文件夹，放进游戏目录（或 AstralParty_ModLoader 里）再点「尝试提取」</li>
+          <li>如果你拿到了<b>原版音频包 ZIP</b>，点「导入音频包 ZIP」</li>
+          <li>两样都没有也没关系：替换、静音、调音量都能正常用，只是听不了原版对比</li></ul></div>
+      <div class="v2-modal-foot"><button class="v2-btn ghost" data-v2modal="close">关闭</button><span class="v2-top-spacer"></span>
         <button class="v2-btn line" data-v2modal="v2sImportOrig">${I().upload}导入音频包 ZIP…</button>
-        <button class="v2-btn primary" data-v2modal="v2sExtract">${I().download}从游戏提取</button></div>`);
+        <button class="v2-btn line" data-v2modal="v2sExtract">尝试提取</button></div>`);
   }
 
   function selectAudio(id) {
@@ -461,12 +470,23 @@
       obj[name] = function (...args) { before?.(name, args); const r = orig.apply(this, args); render(); return r; };
     });
   }
+  // 宿主提取完不管拿到几个都提示「已同步并就绪 N 个」；N = 0 时这句话会让人以为成功了，换成实话
+  const origToast = window.toast;
+  if (typeof origToast === 'function') {
+    window.toast = function (msg, ...rest) {
+      if (/^已同步并就绪 0 个原版音频/.test(String(msg))) msg = '没有提取到原版音频：电脑上没有事先导出的 audio-export 文件夹（替换、静音不受影响）';
+      return origToast.call(this, msg, ...rest);
+    };
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     wrap(SK(), ['renderProfiles', 'renderCards', 'onCardUpdated', 'legacyImported', 'onAnimationState']);
     wrap(CS(), ['switchTab']);
     wrap(AU(), ['renderProfiles', 'renderItems', 'renderExtractProgress', 'renderExtractDone'], (name, args) => {
       if (name === 'renderExtractProgress') K.extract = args[0] || K.extract;
-      if (name === 'renderExtractDone') { K.extract = null; if (AU()?.selectedSchemeId) post({ type: 'audioSkinsGetItems', schemeId: AU().selectedSchemeId }); }
+      if (name === 'renderExtractDone') { K.extract = null; K.extractChecking = true; if (AU()?.selectedSchemeId) post({ type: 'audioSkinsGetItems', schemeId: AU().selectedSchemeId }); }
+      // 提取完重新拿到条目后：一个原版都没有，就说明是「0 个」那种情况
+      if (name === 'renderItems' && K.extractChecking) { K.extractChecking = false; K.extractEmpty = !(args[0]?.items || []).some(i => i.hasOriginal); }
     });
     wrap(RS(), ['render', 'renderProgress', 'renderPaused', 'setBusy'], (name, args) => { if (name === 'renderProgress') K.resP = args[0]; });
     render();
