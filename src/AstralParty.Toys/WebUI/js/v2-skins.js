@@ -1,5 +1,5 @@
 // v2-skins.js — 新界面：自定义页（卡牌 / 角色 / 音效 / 资源包）
-// 本阶段重做：外框、卡牌、音效、资源包。角色分区暂时显示原版面板（下一阶段重做）。
+// 外框、卡牌、音效、资源包在这里；角色分区在 v2-characters.js（通过 window.V2Chars 接进来）。
 // 数据仍由原版模块保存（SkinsModule / AudioSkinsModule / ResourceModsModule），这里包一层方法、跑完后重画。
 // 裁切窗口、按编号导入动态卡面、动态卡面转换进度沿用原版。
 (function () {
@@ -15,7 +15,8 @@
   const AU = () => window.AudioSkinsModule;
   const RS = () => window.ResourceModsModule;
   const tab = () => CS()?.tab || 'cards';
-  const ownTab = () => tab() !== 'characters';
+  // 角色分区由 v2-characters.js 接管后，四个分区都由新界面画；没加载到它时退回原版面板
+  const ownTab = () => tab() !== 'characters' || !!window.V2Chars;
   const fmtBytes = b => !b ? '0 B' : b >= 1073741824 ? (b / 1073741824).toFixed(1) + ' GB' : b >= 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB';
   const hue = s => [...String(s)].reduce((a, c) => a + c.charCodeAt(0), 0) % 360;
   const thumbBg = s => `linear-gradient(135deg, hsl(${hue(s)},60%,45%), hsl(${(hue(s) + 50) % 360},55%,25%))`;
@@ -286,6 +287,7 @@
       t === 'cards' ? (K.cardScheme ? cardScheme() : cardsList())
       : t === 'audio' ? (K.audioScheme ? audioScheme() : audioList())
       : t === 'resource' ? resourceView()
+      : window.V2Chars ? window.V2Chars.html()
       : frameHead()}</div>`;
     // 搜索框：重画后把焦点和光标放回去
     [['v2sCardQ', v => { K.cardQ = v; }], ['v2sAQ', v => { K.aQ = v; K.aLimit = 200; }]].forEach(([id, set]) => {
@@ -293,6 +295,9 @@
       box.oninput = e => { set(e.target.value); render(); const n = $(id); n.focus(); n.setSelectionRange(n.value.length, n.value.length); };
     });
   }
+
+  // 给 v2-characters.js 用
+  window.V2Skins = { frameHead, crumb, metaForm, render, thumbBg, ID_RULE };
 
   /* ---------- 操作 ---------- */
   const confirm = o => U().confirmDelete(o);
