@@ -214,6 +214,77 @@ details.v2-card[open] > summary svg { transform: rotate(180deg); }
 .v2-player small { color: var(--gp-text-muted); font-size: 11px; margin-left: 5px; }
 .v2-player.winner { background: rgba(250, 204, 21, .12); color: var(--gp-gold); }
 
+/* ---------- 模组页 ---------- */
+#modsView { display: block; overflow-y: auto; }
+#modsView.hidden { display: none !important; }
+#modsView > :not(#v2Mods) { display: none !important; }
+.v2-card-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px 6px; font-weight: 600; }
+.v2-mod { display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-top: 1px solid var(--v2-border); }
+.v2-card-title + .v2-mod { border-top: 0; }
+.v2-mod .body { flex: 1; min-width: 0; }
+.v2-mod .name { display: flex; gap: 8px; align-items: center; font-weight: 500; flex-wrap: wrap; }
+.v2-mod .desc { color: var(--gp-text-muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2-mod.off .name { color: var(--gp-text-muted); }
+.v2-switch { position: relative; width: 36px; height: 20px; flex: none; }
+.v2-switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.v2-switch input:disabled { cursor: default; }
+.v2-switch span { position: absolute; inset: 0; border-radius: 999px; background: #3a3f55; transition: background .15s; pointer-events: none; }
+.v2-switch span::after { content: ""; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: #fff; transition: transform .15s; }
+.v2-switch input:checked + span { background: var(--gp-pink); }
+.v2-switch input:checked + span::after { transform: translateX(16px); }
+.v2-switch input:disabled + span { opacity: .5; }
+.v2-num { width: 72px; height: 28px; padding: 0 8px; border-radius: 6px; background: var(--gp-bg); border: 1px solid var(--v2-border-strong); color: #fff; outline: 0; font-size: 14px; }
+.v2-num:focus { border-color: var(--gp-pink); }
+.v2-hero-art svg { width: 20px; height: 20px; }
+
+/* ---------- 自定义页 ---------- */
+/* 原版的标题栏、游戏选择条、页签由新界面替代；卡牌 / 音效 / 资源包面板由新界面重画，角色面板暂用原版 */
+#skinsView > .skins-header, #skinsView > #skinGamePickerBar, #skinsView > .character-skin-tabs { display: none !important; }
+#v2Skins { flex: none; }
+#skinsView.v2-own #v2Skins { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+#skinsView.v2-own #cardSkinPanel, #skinsView.v2-own #audioSkinPanel, #skinsView.v2-own #resourceModPanel, #skinsView.v2-own #characterSkinPanel { display: none !important; }
+#skinsView:not(.v2-own) #cardSkinPanel, #skinsView:not(.v2-own) #audioSkinPanel, #skinsView:not(.v2-own) #resourceModPanel { display: none !important; }
+.v2-page.v2-frame-only { padding-bottom: 0; max-width: none; }
+
+.v2-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+.v2-scheme { background: var(--v2-panel); border: 1px solid var(--v2-border); border-radius: 10px; overflow: hidden; cursor: pointer; text-align: left; padding: 0; color: #f3f5fa; }
+.v2-scheme:hover { border-color: var(--v2-border-strong); }
+.v2-scheme.active { border-color: rgba(255, 23, 118, .55); }
+.v2-scheme .thumb { aspect-ratio: 16 / 10; position: relative; display: grid; place-items: center; font-size: 30px; font-weight: 700; color: rgba(255, 255, 255, .8); }
+.v2-scheme .thumb svg { width: 28px; height: 28px; }
+.v2-scheme .thumb .v2-badge { position: absolute; top: 8px; left: 8px; background: rgba(18, 20, 32, .85); font-size: 12px; }
+.v2-scheme .info { padding: 10px 12px; }
+.v2-scheme .info b { font-weight: 500; display: block; }
+.v2-scheme .info small { color: var(--gp-text-muted); font-size: 12px; }
+
+.v2-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+.v2-tcard { position: relative; border-radius: 8px; border: 1px solid var(--v2-border); background: var(--v2-panel); overflow: hidden; padding: 0; cursor: pointer; color: #f3f5fa; text-align: left; }
+.v2-tcard:hover { border-color: var(--v2-border-strong); }
+.v2-tcard img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; background: #0d0f18; }
+.v2-tcard .cap { display: block; padding: 6px 8px; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2-tcard .cap small { color: var(--gp-text-muted); margin-left: 4px; }
+.v2-tcard > .v2-dot { position: absolute; top: 6px; right: 6px; }
+.v2-tcard .anim { position: absolute; top: 6px; left: 6px; font-size: 10px; }
+.v2-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--gp-pink); box-shadow: 0 0 0 2px var(--v2-panel); margin-right: 4px; }
+.v2-cardmodal { display: flex; gap: 18px; padding: 18px; }
+.v2-cardmodal img { width: 200px; height: 200px; object-fit: contain; border-radius: 8px; background: #0d0f18; flex: none; }
+.v2-cardmodal .side { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+
+.v2-field { margin-bottom: 14px; }
+.v2-field label { display: block; font-weight: 500; margin-bottom: 2px; }
+.v2-field small { display: block; color: var(--gp-text-muted); font-size: 12px; margin-bottom: 6px; }
+.v2-field input, .v2-field textarea, .v2-select { width: 100%; padding: 7px 10px; border-radius: 8px; background: var(--gp-bg); border: 1px solid var(--v2-border-strong); color: #fff; outline: 0; font: inherit; }
+.v2-select { width: auto; min-width: 140px; height: 34px; padding: 0 10px; }
+.v2-field input:focus, .v2-field textarea:focus { border-color: var(--gp-pink); }
+.v2-err { color: #f43f5e; font-size: 13px; margin: 0; min-height: 18px; }
+
+.v2-audio .aid { width: 52px; flex: none; color: var(--gp-pink); font-size: 12px; font-variant-numeric: tabular-nums; }
+.v2-audio .play { height: 30px; padding: 0 10px; font-size: 13px; }
+.v2-audio .vol { display: flex; align-items: center; gap: 6px; white-space: nowrap; font-size: 12px; }
+.v2-audio .vol input { width: 80px; accent-color: var(--gp-pink); }
+.v2-audio .vol span { width: 36px; }
+.v2-log { margin: 0 18px 16px; padding: 10px; max-height: 240px; overflow: auto; background: #0d0f18; border-radius: 8px; font-size: 12px; color: var(--gp-text-sub); white-space: pre-wrap; }
+
 /* ---------- 弹窗 / 删除确认 ---------- */
 .v2-modal { position: fixed; inset: 0; z-index: 400; display: none; place-items: center; background: rgba(0, 0, 0, .55); }
 .v2-modal.show { display: grid; }

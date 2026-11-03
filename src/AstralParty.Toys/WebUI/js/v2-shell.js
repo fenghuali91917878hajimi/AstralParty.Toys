@@ -242,7 +242,7 @@
             : '<span class="v2-muted">还没有回放</span>'}</span>${ICON.right}</div>
         <div class="v2-row link" data-v2page="mods"><span class="k">模组</span>
           <span class="v">${s ? `${(s.mods || []).filter(m => m.enabled !== false).length} / ${(s.mods || []).length} 已启用` : '<span class="v2-muted">查看与配置模组</span>'}</span>${ICON.right}</div>
-        <div class="v2-row link" data-v2page="skins"><span class="k">皮肤</span>
+        <div class="v2-row link" data-v2page="skins"><span class="k">自定义</span>
           <span class="v">${esc(skinText)}</span>${ICON.right}</div>
       </div>
 
