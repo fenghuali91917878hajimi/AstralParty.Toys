@@ -134,6 +134,9 @@ body.v2-maximized .v2-win .restore { display: block; }
 .v2-hero-art { width: 56px; height: 56px; border-radius: 10px; flex: none; overflow: hidden; display: grid; place-items: center;
   background: linear-gradient(135deg, var(--gp-pink), #a855f7); color: #fff; font-size: 24px; }
 .v2-hero-art img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+/* 概览：吉星派对的游戏图标（取自 Steam 桌面快捷方式用的 .ico，256px） */
+.v2-hero-art.game-icon { background: none; border-radius: 12px; }
+.v2-hero-art.game-icon img { object-position: center; }
 .v2-hero-text { flex: 1; min-width: 0; }
 .v2-hero-title { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 600; }
 .v2-hero-sub { color: var(--gp-text-muted); font-size: 13px; margin-top: 2px; }
@@ -380,6 +383,62 @@ details.v2-mini summary { cursor: pointer; color: var(--gp-text-sub); font-size:
 .v2-btn.danger:hover:not(:disabled) { background: rgba(244, 63, 94, .1); }
 .v2-btn.danger-fill { background: #f43f5e; color: #fff; }
 .v2-btn.danger-fill:hover:not(:disabled) { background: #e11d48; }
+
+/* ---------- 沿用的原版弹窗：统一成新界面样式（只改样式，不动逻辑） ----------
+   覆盖：全局弹窗 #globalModal（模组配置、加载器设置、导入发布包、按 ID 下载、版本信息、更新日志、裁切）
+   和原生 <dialog>（新建皮肤包等）。
+   character-skins.css 比本文件后加载，且用 :is(#id…) 写规则（优先级 1,1,0），
+   所以这里统一以 html body :is(含 id) 开头，保证优先级更高。 */
+html body #globalModal.modal-backdrop { background: rgba(0, 0, 0, .55); backdrop-filter: none; }
+html body #globalModal .modal-content {
+  background: var(--v2-panel); border: 1px solid var(--v2-border-strong); border-radius: 12px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, .5); animation: none; transform: none; font-size: 14px;
+}
+html body #globalModal .modal-header { padding: 16px 18px; background: none; border-bottom: 1px solid var(--v2-border); }
+html body #globalModal .modal-header h3 { font-size: 16px; font-weight: 600; letter-spacing: 0; display: flex; align-items: center; gap: 8px; }
+html body #globalModal .modal-header h3 svg { width: 18px; height: 18px; color: var(--gp-text-muted); }
+html body #globalModal .modal-close-btn { width: 32px; height: 32px; border-radius: 8px; background: none; border: 0; color: var(--gp-text-muted); }
+html body #globalModal .modal-close-btn:hover { background: var(--v2-hover); color: #fff; transform: none; }
+
+/* 原生 <dialog>（新建皮肤包、角色方案相关的原版表单） */
+html body :is(dialog, #characterCreateDialog, #characterSchemeCreateDialog, #characterBindingDialog, #characterSchemeMetaDialog, .skin-modal-dialog) {
+  width: min(520px, 92vw); padding: 20px 22px; color: #f3f5fa; font-size: 14px;
+  background: var(--v2-panel); border: 1px solid var(--v2-border-strong); border-radius: 12px; box-shadow: 0 24px 48px rgba(0, 0, 0, .5);
+}
+html body :is(dialog, #characterCreateDialog, #characterSchemeCreateDialog, #characterBindingDialog, #characterSchemeMetaDialog, .skin-modal-dialog)::backdrop { background: rgba(0, 0, 0, .55); backdrop-filter: none; }
+html body :is(dialog, #characterCreateDialog, #characterSchemeCreateDialog, #characterBindingDialog, #characterSchemeMetaDialog) h3 { font-size: 16px; font-weight: 600; margin: 0 0 16px; }
+html body :is(dialog, #characterCreateDialog, #characterSchemeCreateDialog, #characterBindingDialog, #characterSchemeMetaDialog) label { font-weight: 500; font-size: 14px; color: #f3f5fa; }
+html body :is(dialog, #characterCreateDialog, #characterSchemeCreateDialog, #characterBindingDialog, #characterSchemeMetaDialog) p { color: var(--gp-text-muted); font-size: 13px; }
+html body :is(dialog, #characterCreateDialog) .character-toolbar { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+
+/* 弹窗里的按钮 */
+html body :is(#globalModal, dialog, #characterCreateDialog, #characterSchemeCreateDialog, #characterBindingDialog, #characterSchemeMetaDialog) :is(.primary-btn, .secondary-btn, .danger-btn) {
+  height: 34px; padding: 0 14px; border-radius: 8px; font-weight: 500; font-size: 14px; box-shadow: none; transform: none;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+}
+html body :is(#globalModal, dialog, #characterCreateDialog, #characterSchemeCreateDialog, #characterBindingDialog, #characterSchemeMetaDialog) .primary-btn { background: var(--gp-pink); color: #fff; border: 0; }
+html body :is(#globalModal, dialog, #characterCreateDialog, #characterSchemeCreateDialog, #characterBindingDialog, #characterSchemeMetaDialog) .primary-btn:hover:not(:disabled) { background: var(--gp-pink-hover); box-shadow: none; transform: none; }
+html body :is(#globalModal, dialog, #characterCreateDialog, #characterSchemeCreateDialog, #characterBindingDialog, #characterSchemeMetaDialog) .secondary-btn { background: none; color: var(--gp-text-sub); border: 1px solid var(--v2-border-strong); }
+html body :is(#globalModal, dialog, #characterCreateDialog, #characterSchemeCreateDialog, #characterBindingDialog, #characterSchemeMetaDialog) .secondary-btn:hover:not(:disabled) { background: var(--v2-hover); color: #fff; border-color: var(--v2-border-strong); box-shadow: none; transform: none; }
+html body :is(#globalModal, dialog, #characterCreateDialog) .danger-btn { background: #f43f5e; color: #fff; border: 0; }
+html body :is(#globalModal, dialog, #characterCreateDialog) .link-btn { color: var(--gp-pink); background: none; border: 0; font-weight: 500; }
+html body :is(#globalModal, dialog, #characterCreateDialog) :is(.primary-btn, .secondary-btn, .danger-btn):disabled { opacity: .5; box-shadow: none; }
+
+/* 弹窗里的输入框、下拉框、勾选框 */
+html body :is(#globalModal, dialog, #characterCreateDialog, #characterSchemeCreateDialog, #characterBindingDialog, #characterSchemeMetaDialog) :is(input[type="text"], input[type="number"], input[type="search"], input:not([type]), select, textarea) {
+  background: var(--gp-bg); border: 1px solid var(--v2-border-strong); border-radius: 8px; color: #fff;
+  min-height: 34px; padding: 6px 10px; font-size: 14px; box-shadow: none; outline: 0;
+}
+html body :is(#globalModal, dialog, #characterCreateDialog, #characterSchemeCreateDialog, #characterBindingDialog, #characterSchemeMetaDialog) :is(input, select, textarea):focus { border-color: var(--gp-pink); box-shadow: none; outline: 0; }
+html body :is(#globalModal, dialog, #characterCreateDialog) input[type="checkbox"], html body :is(#globalModal, dialog) input[type="radio"] { accent-color: var(--gp-pink); }
+
+/* 原版表单内容的细节 */
+html body #globalModal .cfg-hint, html body #globalModal .download-intro { color: var(--gp-text-muted); font-size: 13px; line-height: 1.6; }
+html body #globalModal .download-intro strong { color: #fff; }
+html body #globalModal .cfg-actions, html body #globalModal .download-actions, html body #globalModal .version-info-actions { display: flex; justify-content: flex-end; gap: 8px; }
+html body #globalModal .mods-help > summary, html body #globalModal .cfg-advanced > summary { color: var(--gp-text-sub); }
+html body #globalModal .changelog-tab { border-radius: 6px; }
+html body #globalModal .changelog-tab.is-active { background: var(--v2-panel-2); color: #fff; box-shadow: none; border-color: transparent; }
 
 /* ---------- 市场占位 ---------- */
 .v2-coming { padding: 48px 24px; text-align: center; }

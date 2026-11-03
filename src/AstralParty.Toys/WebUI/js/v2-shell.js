@@ -224,7 +224,6 @@
         </div></div>`;
       return;
     }
-    const portrait = AppState.currentPortrait;
     const s = V2.modStatus;
     const busy = launchBusy(), locked = modeLocked();
     const last = latestReplay();
@@ -240,7 +239,7 @@
       <div class="v2-head"><h1>概览</h1></div>
       <div class="v2-card">
         <div class="v2-hero">
-          <div class="v2-hero-art">${portrait?.url ? `<img src="${esc(portrait.url)}" alt="${esc(portrait.heroName || '')}">` : '★'}</div>
+          <div class="v2-hero-art game-icon"><img src="images/astralparty-game-icon.png" alt="吉星派对"></div>
           <div class="v2-hero-text">
             <div class="v2-hero-title">吉星派对 <span class="v2-tag">${esc(g.editionLabel || '')}</span>
               ${gameRunning() ? '<span class="v2-badge pink">运行中</span>' : g.directoryExists === false ? '<span class="v2-badge warn">目录不存在</span>' : '<span class="v2-badge">就绪</span>'}</div>
