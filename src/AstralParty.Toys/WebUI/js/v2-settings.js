@@ -10,7 +10,13 @@
   const profiles = () => AppState.gameProfiles?.profiles || GL()?.data?.profiles || [];
   const drives = () => GL()?.data?.drives || AppState.gameProfiles?.drives || [];
   const EDITIONS = [['cn', '国服'], ['global', '国际服'], ['taptap', 'TapTap'], ['custom', '自定义']];
-  const LANGS = [['zh-Hans', '简体中文'], ['zh-Hant', '繁體中文'], ['en', 'English'], ['ja', '日本語']];
+  // 新界面的文字目前只写了简体中文，语言固定成简体中文（设置页里的下拉框是灰的）
+  const DEFAULT_LANG = 'zh-Hans';
+  function enforceLanguage() {
+    if ((window.i18n?.lang || DEFAULT_LANG) === DEFAULT_LANG) return;
+    window.i18n?.setLanguage(DEFAULT_LANG, true);
+    post({ type: 'setLanguage', language: DEFAULT_LANG });   // 宿主也用它生成回放报告里的文字
+  }
   const SOURCES = { steam: 'Steam 库', registry: '注册表', common: '常见位置', deep: '深度扫描' };
   const motionOn = () => { try { return localStorage.getItem('motionEnabled') !== 'false'; } catch { return true; } };
 
@@ -49,15 +55,14 @@
   }
 
   function html() {
-    const lang = window.i18n?.lang || LS().language || 'zh-Hans';
     const cap = LS().capacity || 10, keep = LS().keepInGame || cap;
     const info = window.VersionModule?.info;
     return `<div class="v2-page">
       <div class="v2-head"><h1>设置</h1></div>
 
       <div class="v2-card"><div class="v2-card-title"><span>界面</span></div>
-        <div class="v2-row"><span class="k">语言</span><span class="v"></span>
-          <select id="v2gLang" class="v2-select">${LANGS.map(([v, l]) => `<option value="${v}" ${lang === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+        <div class="v2-row"><span class="k">语言</span><span class="v v2-muted">新界面目前只有简体中文，暂时不能切换</span>
+          <select id="v2gLang" class="v2-select" disabled title="新界面目前只有简体中文"><option value="${DEFAULT_LANG}" selected>简体中文</option></select></div>
         <div class="v2-row"><span class="k">界面动画</span><span class="v v2-muted">关掉后切页、弹窗都没有过渡动画</span>
           <label class="v2-switch"><input type="checkbox" id="v2gMotion" ${motionOn() ? 'checked' : ''}><span></span></label></div>
       </div>
@@ -168,13 +173,6 @@
   document.addEventListener('change', ev => {
     const t = ev.target;
     if (!t.closest?.('#v2Settings')) return;
-    if (t.id === 'v2gLang') {
-      // 与原版一致：先切界面语言，再告诉宿主（宿主用它生成回放报告里的文字）
-      window.i18n?.setLanguage(t.value, true);
-      post({ type: 'setLanguage', language: t.value });
-      const old = $('langSelect'); if (old) old.value = t.value;
-      return;
-    }
     if (t.id === 'v2gMotion') {
       document.body.classList.toggle('reduce-motion', !t.checked);
       try { localStorage.setItem('motionEnabled', String(t.checked)); } catch { /* 存不了也不影响本次 */ }
@@ -197,7 +195,7 @@
       if (or) gl.renderScanResult = function (p) { const r = or.call(this, p); G.scan = { mode: p?.mode, running: false, candidates: p?.candidates || [] }; render(); return r; };
     }
     const sm = window.SettingsModule;
-    if (sm?.applyLibrarySettings) { const o = sm.applyLibrarySettings; sm.applyLibrarySettings = function (...a) { const r = o.apply(this, a); render(); return r; }; }
+    if (sm?.applyLibrarySettings) { const o = sm.applyLibrarySettings; sm.applyLibrarySettings = function (...a) { const r = o.apply(this, a); enforceLanguage(); render(); return r; }; }
     const vm = window.VersionModule;
     if (vm?.render) { const o = vm.render; vm.render = function (...a) { const r = o.apply(this, a); render(); return r; }; }
     // 加了游戏目录后，扫描结果里的「已添加」要跟着变
@@ -207,6 +205,7 @@
       G.scan.candidates.forEach(c => { if (dirs.has(String(c.directory).toLowerCase())) c.alreadyAdded = true; });
       setTimeout(render);
     });
+    enforceLanguage();
     render();
   });
 })();

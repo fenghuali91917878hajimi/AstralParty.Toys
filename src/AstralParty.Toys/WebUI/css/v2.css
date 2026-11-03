@@ -298,6 +298,8 @@ details.v2-card[open] > summary svg { transform: rotate(180deg); }
 .v2-select { width: auto; min-width: 140px; height: 34px; padding: 0 10px; }
 .v2-field input:focus, .v2-field textarea:focus { border-color: var(--gp-pink); }
 .v2-err { color: #f43f5e; font-size: 13px; margin: 0; min-height: 18px; }
+/* 不可用的下拉框（比如设置里固定成简体中文的语言）：灰掉，鼠标显示不可点 */
+html body .v2-select:disabled { opacity: .45; cursor: not-allowed; color: var(--gp-text-muted); }
 
 .v2-audio .aid { width: 52px; flex: none; color: var(--gp-pink); font-size: 12px; font-variant-numeric: tabular-nums; }
 .v2-audio .play { height: 30px; padding: 0 10px; font-size: 13px; }
