@@ -172,6 +172,67 @@ details.v2-card[open] > summary svg { transform: rotate(180deg); }
 .v2-menu button:disabled { opacity: .4; cursor: default; }
 .v2-menu hr { border: 0; border-top: 1px solid var(--v2-border); margin: 4px 0; }
 
+/* ---------- 列表页通用：工具栏、搜索、分段、提示、空状态 ---------- */
+.v2-toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+.v2-search { flex: 1; min-width: 200px; display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 10px; border-radius: 8px; background: var(--v2-panel); border: 1px solid var(--v2-border); color: var(--gp-text-muted); }
+.v2-search svg { width: 16px; height: 16px; }
+.v2-search input { flex: 1; min-width: 0; background: none; border: 0; outline: 0; color: #fff; font-size: 14px; }
+.v2-seg { display: inline-flex; padding: 3px; background: var(--v2-panel); border: 1px solid var(--v2-border); border-radius: 8px; }
+.v2-seg button { height: 28px; padding: 0 12px; border-radius: 6px; color: var(--gp-text-muted); font-size: 13px; }
+.v2-seg button.on { background: var(--v2-panel-2); color: #fff; }
+.v2-notice { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 8px; background: rgba(250, 204, 21, .08); border: 1px solid rgba(250, 204, 21, .25); color: var(--gp-gold); font-size: 13px; margin-bottom: 14px; }
+.v2-notice svg { width: 16px; height: 16px; flex: none; }
+.v2-empty { padding: 32px; text-align: center; color: var(--gp-text-muted); }
+.v2-bar { flex: 1; max-width: 220px; height: 6px; background: var(--v2-panel-2); border-radius: 999px; overflow: hidden; }
+.v2-bar div { height: 100%; background: var(--gp-pink); }
+.v2-crumb { display: flex; align-items: center; gap: 4px; font-size: 22px; font-weight: 700; color: var(--gp-text-muted); min-width: 0; }
+.v2-crumb button { color: var(--gp-text-muted); font-weight: 700; font-size: 22px; padding: 0; }
+.v2-crumb button:hover { color: #fff; }
+.v2-crumb svg { width: 20px; height: 20px; flex: none; }
+.v2-crumb .cur { color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v2-tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--v2-border); }
+.v2-tabs button { padding: 8px 14px; color: var(--gp-text-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; font-size: 14px; }
+.v2-tabs button.on { color: #fff; border-color: var(--gp-pink); }
+
+/* ---------- 回放页 ---------- */
+/* 原版的标题栏、页签、旧列表都由新界面替代（DOM 保留，脚本照常往里写） */
+#toolsView > .tools-header, #toolsView #replaySubnav, #toolsView #replayEmptyBox { display: none !important; }
+#v2Replays { flex: none; }
+#toolsView.v2-list-mode #v2Replays { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+#toolsView.v2-list-mode .tools-workspace { display: none; }
+.v2-detail-head { max-width: none; padding: 20px 30px 0; }
+.v2-replay-list { display: grid; gap: 10px; }
+.v2-replay { display: flex; align-items: center; gap: 14px; padding: 14px 16px; cursor: pointer; margin: 0; }
+.v2-replay:hover { border-color: var(--v2-border-strong); background: #1d2133; }
+.v2-replay .body { flex: 1; min-width: 0; }
+.v2-replay .title { display: flex; align-items: center; gap: 8px; font-weight: 600; flex-wrap: wrap; }
+.v2-replay .meta { color: var(--gp-text-muted); font-size: 12px; display: flex; gap: 10px; margin-top: 2px; flex-wrap: wrap; }
+.v2-replay .players { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.v2-map { width: 48px; height: 48px; border-radius: 8px; flex: none; display: grid; place-items: center; font-size: 18px; font-weight: 700; color: rgba(255, 255, 255, .85); background: linear-gradient(135deg, #2d3558, #1f2438); }
+.v2-replay.bad .v2-map { color: var(--gp-gold); background: rgba(250, 204, 21, .08); }
+.v2-player { font-size: 12px; padding: 1px 8px; border-radius: 4px; background: var(--v2-panel-2); color: var(--gp-text-sub); white-space: nowrap; }
+.v2-player small { color: var(--gp-text-muted); font-size: 11px; margin-left: 5px; }
+.v2-player.winner { background: rgba(250, 204, 21, .12); color: var(--gp-gold); }
+
+/* ---------- 弹窗 / 删除确认 ---------- */
+.v2-modal { position: fixed; inset: 0; z-index: 400; display: none; place-items: center; background: rgba(0, 0, 0, .55); }
+.v2-modal.show { display: grid; }
+.v2-modal-box { width: 520px; max-width: calc(100vw - 32px); max-height: calc(100vh - 48px); overflow-y: auto; background: var(--v2-panel); border: 1px solid var(--v2-border-strong); border-radius: 12px; color: #f3f5fa; font-size: 14px; }
+.v2-modal-box.narrow { width: 440px; }
+.v2-modal-head { display: flex; align-items: center; gap: 8px; padding: 16px 18px; border-bottom: 1px solid var(--v2-border); }
+.v2-modal-head b { flex: 1; font-size: 16px; }
+.v2-modal-foot { display: flex; align-items: center; gap: 8px; padding: 12px 18px; border-top: 1px solid var(--v2-border); }
+.v2-confirm { display: flex; gap: 14px; padding: 20px 20px 8px; }
+.v2-confirm-icon { width: 40px; height: 40px; border-radius: 50%; flex: none; display: grid; place-items: center; background: rgba(244, 63, 94, .12); color: #f43f5e; }
+.v2-confirm-icon svg { width: 20px; height: 20px; }
+.v2-confirm-title { display: block; font-size: 16px; font-weight: 600; margin-top: 8px; }
+.v2-confirm-lines { margin: 10px 0 0; padding-left: 18px; color: var(--gp-text-sub); font-size: 13px; line-height: 1.7; }
+.v2-confirm-lines b { color: #fff; }
+.v2-btn.danger { color: #f43f5e; }
+.v2-btn.danger:hover:not(:disabled) { background: rgba(244, 63, 94, .1); }
+.v2-btn.danger-fill { background: #f43f5e; color: #fff; }
+.v2-btn.danger-fill:hover:not(:disabled) { background: #e11d48; }
+
 /* ---------- 市场占位 ---------- */
 .v2-coming { padding: 48px 24px; text-align: center; }
 .v2-coming-icon { width: 72px; height: 72px; margin: 0 auto 14px; border-radius: 20px; display: grid; place-items: center; background: var(--v2-pink-soft); color: var(--gp-pink); }

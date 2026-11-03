@@ -15,6 +15,14 @@
     book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>',
     ext: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>',
     sliders: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><line x1="4" x2="4" y1="21" y2="14"/><line x1="4" x2="4" y1="10" y2="3"/><line x1="12" x2="12" y1="21" y2="12"/><line x1="12" x2="12" y1="8" y2="3"/><line x1="20" x2="20" y1="21" y2="16"/><line x1="20" x2="20" y1="12" y2="3"/><line x1="2" x2="6" y1="14" y2="14"/><line x1="10" x2="14" y1="8" y2="8"/><line x1="18" x2="22" y1="16" y2="16"/></svg>',
+    trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>',
+    more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>',
+    upload: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>',
+    download: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>',
+    archive: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="5" x="2" y="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/><path d="M10 12h4"/></svg>',
+    refresh: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>',
+    info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>',
+    x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>',
     sparkles: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/></svg>',
   };
 
@@ -46,6 +54,47 @@
   function closeMenu() { $('v2Menu')?.classList.remove('show'); }
   document.addEventListener('pointerdown', e => {
     if (!e.target.closest?.('#v2Menu') && !e.target.closest?.('[data-v2menu]')) closeMenu();
+  });
+
+  /* ---------- 弹窗 + 删除确认（新页面共用） ----------
+     删除确认：说清删什么、留什么、能不能找回；「取消」默认获得焦点，危险按钮打开 0.5 秒后才能点。 */
+  let modalCancel = null;
+  function openModal(html, cls = '') {
+    let m = $('v2Modal');
+    if (!m) {
+      m = document.createElement('div'); m.id = 'v2Modal'; m.className = 'v2-modal'; document.body.appendChild(m);
+      m.addEventListener('click', e => {
+        if (e.target === m) return (modalCancel || closeModal)();
+        const b = e.target.closest('[data-v2modal]');
+        if (b && !b.disabled) modalActions[b.dataset.v2modal]?.(b);
+      });
+    }
+    modalCancel = null;
+    m.innerHTML = `<div class="v2-modal-box ${cls}">${html}</div>`;
+    m.classList.add('show');
+    return m;
+  }
+  function closeModal() { modalCancel = null; $('v2Modal')?.classList.remove('show'); }
+  // 弹窗里的按钮写 data-v2modal="名字"，由调用方注册处理函数
+  const modalActions = { close: () => (modalCancel || closeModal)() };
+
+  function armDanger(m) {
+    m.querySelectorAll('.v2-btn.danger-fill, .v2-btn.danger').forEach(b => { b.disabled = true; setTimeout(() => { b.disabled = false; }, 500); });
+  }
+  function confirmDelete({ title, lines, ok = '删除', onOk, onCancel }) {
+    modalActions.confirmYes = () => { closeModal(); onOk?.(); };
+    const m = openModal(`
+      <div class="v2-confirm"><div class="v2-confirm-icon">${ICON.trash}</div>
+        <div><b class="v2-confirm-title">${title}</b><ul class="v2-confirm-lines">${lines.filter(Boolean).map(l => `<li>${l}</li>`).join('')}</ul></div></div>
+      <div class="v2-modal-foot"><span class="v2-top-spacer"></span>
+        <button class="v2-btn ghost" data-v2modal="close" id="v2ConfirmNo">取消</button>
+        <button class="v2-btn danger-fill" data-v2modal="confirmYes">${ICON.trash}${ok}</button></div>`, 'narrow');
+    modalCancel = onCancel || closeModal;
+    armDanger(m);
+    $('v2ConfirmNo')?.focus();
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && $('v2Modal')?.classList.contains('show')) (modalCancel || closeModal)();
   });
 
   /* ---------- 顶栏外部跳转（攻略 / GitHub） ----------
@@ -268,6 +317,10 @@
         <button class="v2-btn line" data-v2page="mods" style="margin-top:10px">去模组页</button>
       </div></div>`;
   }
+
+  // 给后面各页（v2-replays.js 等）用的公共件
+  window.V2UI = { ICON, openMenu, closeMenu, openModal, closeModal, modalActions, armDanger, confirmDelete,
+    setModalCancel: fn => { modalCancel = fn; } };
 
   /* ---------- 接线 ---------- */
   function onShowHome() {
