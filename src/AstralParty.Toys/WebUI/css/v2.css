@@ -341,6 +341,11 @@ details.v2-mini summary { cursor: pointer; color: var(--gp-text-sub); font-size:
 .v2-frames button.on { border-color: var(--gp-pink); }
 .v2-code { width: 100%; min-height: 260px; padding: 10px; border-radius: 8px; background: #0d0f18; border: 1px solid var(--v2-border-strong); color: var(--gp-text-sub); font: 12px/1.5 var(--v2-mono); outline: 0; resize: vertical; }
 
+/* ---------- 设置页 ---------- */
+#settingsView { display: block; overflow-y: auto; }
+#settingsView.hidden { display: none !important; }
+#settingsView > :not(#v2Settings) { display: none !important; }
+
 /* ---------- 弹窗 / 删除确认 ---------- */
 .v2-modal { position: fixed; inset: 0; z-index: 400; display: none; place-items: center; background: rgba(0, 0, 0, .55); }
 .v2-modal.show { display: grid; }
