@@ -39,6 +39,8 @@ body.page-home-active .page-container { height: auto; }
 .brand-logo { width: 24px; height: 24px; border-radius: 6px; border: 0; font-size: 13px; box-shadow: none; }
 .brand-text h1 { font-size: 14px; font-weight: 700; letter-spacing: 0.02em; text-shadow: none; }
 .brand-text small { display: none; }
+/* 「（改）」：标明这是基于原作者版本修改的，不是原作者发布的版本（AGPL-3.0 要求修改版要明显标注） */
+.v2-modmark { font-size: 13px; font-weight: 500; letter-spacing: 0; color: var(--gp-pink); margin-left: 2px; cursor: help; }
 
 .nav-breadcrumbs {
   position: fixed;

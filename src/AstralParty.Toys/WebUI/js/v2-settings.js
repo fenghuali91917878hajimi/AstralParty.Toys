@@ -96,7 +96,9 @@
           <button class="v2-btn ghost" data-v2g="changelog">更新日志</button></div>
         <div class="v2-row"><span class="k">运行环境</span><span class="v v2-muted">${esc([info?.runtime, info?.architecture].filter(Boolean).join(' · ') || '—')}</span></div>
         <div class="v2-row"><span class="k">内置加载器</span><span class="v v2-muted">${esc(info?.embeddedLoaderVersion ? 'CesiumLoader v' + String(info.embeddedLoaderVersion).replace(/^v/i, '') : '没有内嵌发布包')}</span></div>
-        <div class="v2-row"><span class="k">项目主页</span><span class="v v2-muted">在顶栏右上角的「GitHub」</span></div>
+        <div class="v2-row"><span class="k">说明</span><span class="v" style="white-space:normal">这是<b>修改版</b>（界面重做），基于原作者 higashitaniyume 的 AstralParty.Toys 修改，不是原作者发布的版本。
+          <br><span class="v2-muted">原项目使用 AGPL-3.0 许可证；遇到问题请先在这个修改版里排查，不要直接找原作者。</span></span></div>
+        <div class="v2-row"><span class="k">原项目主页</span><span class="v v2-muted">在顶栏右上角的「GitHub」</span></div>
       </div>
     </div>`;
   }
