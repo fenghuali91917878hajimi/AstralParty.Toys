@@ -21,6 +21,7 @@
   const motionOn = () => { try { return localStorage.getItem('motionEnabled') !== 'false'; } catch { return true; } };
   // AGPL-3.0：把修改版给别人用，要让对方能拿到对应的源码
   const SOURCE_URL = 'https://github.com/fenghuali91917878hajimi/AstralParty.Toys/tree/redesign';
+  const UPSTREAM_URL = 'https://github.com/higashitaniyume/AstralParty.Toys';
   const MIRRORS = [['direct', '直连 GitHub'], ['gh-proxy', 'GH-Proxy 镜像'], ['ghfast', 'GHFast 镜像'], ['custom', '自定义镜像']];
 
   // 回放库设置：宿主收到缺字段会当成「默认 / 关闭」，所以每次都把四个字段一起送
@@ -47,7 +48,7 @@
           <span class="v2-muted">· ${SOURCES[c.source] || ''}</span><br><span class="v2-muted" style="font-family:var(--v2-mono);font-size:12px">${esc(c.directory)}</span></span>
         ${c.alreadyAdded ? '<span class="v2-muted">已添加</span>' : `<button class="v2-btn line" data-v2g-add="${i}">添加</button>`}</div>`;
     const main = all.map((c, i) => [c, i]).filter(([c]) => isAP(c)), others = all.map((c, i) => [c, i]).filter(([c]) => !isAP(c));
-    return `<div class="v2-row"><span class="v"><b style="font-weight:500">${main.length ? `找到 ${main.length} 个吉星派对` : sc.mode === 'deep' ? '这个盘上没找到 AstralParty*.exe' : '快速扫描没找到吉星派对，可以对某个盘做深度扫描'}</b></span>
+    return `<div class="v2-row"><span class="v"><b style="font-weight:500">${main.length ? `找到 ${main.length} 个吉星派对` : sc.message ? esc(sc.message) : sc.mode === 'deep' ? '这个盘上没找到 AstralParty*.exe' : '快速扫描没找到吉星派对，可以对某个盘做深度扫描'}</b></span>
         <button class="v2-btn ghost" data-v2g="scanClose" title="关闭">${I().x}</button></div>
       ${main.map(([c, i]) => row(c, i)).join('')}
       ${others.length ? `<details class="v2-mini" style="margin:0 18px 10px"><summary>还找到 ${others.length} 个别的游戏（多半不是吉星派对）</summary>
@@ -116,8 +117,9 @@
           <br><span class="v2-muted">原项目使用 AGPL-3.0 许可证；遇到问题请先在这个修改版里排查，不要直接找原作者。</span></span></div>
         <div class="v2-row"><span class="k">软件更新</span><span class="v v2-muted" style="white-space:normal">修改版不会自动更新：作者的更新包是原版界面，装上会盖掉新界面。作者出新版后，要把改动合并进来再重新打包。</span></div>
         <div class="v2-row"><span class="k">修改版源码</span><span class="v" style="white-space:normal;font-family:var(--v2-mono);font-size:13px">${esc(SOURCE_URL)}</span>
-          <button class="v2-btn ghost" data-v2g="copySource">${I().copy}复制</button></div>
-        <div class="v2-row"><span class="k">原项目主页</span><span class="v v2-muted">在顶栏右上角的「GitHub」</span></div>
+          <button class="v2-btn ghost" data-v2g="copyUrl" data-url="${esc(SOURCE_URL)}">${I().copy}复制</button></div>
+        <div class="v2-row"><span class="k">原项目主页</span><span class="v" style="white-space:normal;font-family:var(--v2-mono);font-size:13px">${esc(UPSTREAM_URL)}</span>
+          <button class="v2-btn ghost" data-v2g="copyUrl" data-url="${esc(UPSTREAM_URL)}">${I().copy}复制</button></div>
       </div>
 
       <div class="v2-card"><div class="v2-card-title"><span>卸载</span></div>
@@ -223,7 +225,7 @@
     versionDetail: () => window.VersionModule?.showDetails(),
     changelog: () => window.VersionModule?.requestChangelog('app'),
     uninstall: () => post({ type: 'appUninstallInfo' }),
-    copySource: () => Promise.resolve(navigator.clipboard?.writeText(SOURCE_URL)).then(() => toast('已复制源码地址'), () => toast('复制失败：' + SOURCE_URL)),
+    copyUrl: el => Promise.resolve(navigator.clipboard?.writeText(el.dataset.url)).then(() => toast('已复制地址'), () => toast('复制失败：' + el.dataset.url)),
   };
 
   document.addEventListener('click', ev => {
@@ -272,7 +274,7 @@
       ['renderProfiles'].forEach(n => { const o = gl[n]; if (typeof o === 'function') gl[n] = function (...a) { const r = o.apply(this, a); render(); return r; }; });
       const op = gl.renderScanProgress, or = gl.renderScanResult;
       if (op) gl.renderScanProgress = function (p) { const r = op.call(this, p);
-        G.scan = { ...(G.scan || {}), mode: p?.mode || G.scan?.mode, running: p?.mode === 'deep' ? !!p.running : true, message: p?.message, current: p?.current, candidates: G.scan?.candidates || [] };
+        G.scan = { ...(G.scan || {}), mode: p?.mode || G.scan?.mode, running: !!p?.running, message: p?.message, current: p?.current, candidates: G.scan?.candidates || [] };
         render(); return r; };
       if (or) gl.renderScanResult = function (p) { const r = or.call(this, p); G.scan = { mode: p?.mode, running: false, candidates: p?.candidates || [] }; render(); return r; };
     }

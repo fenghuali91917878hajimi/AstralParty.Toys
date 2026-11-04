@@ -101,7 +101,7 @@
      第一次点：按钮下方提示「再次点击跳转页面」，3 秒内再点才打开；两次点击至少隔 0.5 秒。 */
   const JUMPS = {
     wiki: { name: 'BWiki 攻略', url: 'https://wiki.biligame.com/starengine/%E9%A6%96%E9%A1%B5' },
-    github: { name: 'GitHub 仓库', url: 'https://github.com/higashitaniyume/AstralParty.Toys' },
+    github: { name: 'GitHub 仓库', url: 'https://github.com/fenghuali91917878hajimi/AstralParty.Toys' },   // 修改版的问题不要找原作者，原项目地址在设置 → 关于
   };
   const ARM_MS = 3000, GAP_MS = 500;
   const jumpSt = {}, jumpLast = {};
@@ -307,6 +307,7 @@
       const count = (window.ModsModule?.builtInMods || []).length;
       inner = `<b>安装模组</b>
         <p class="v2-muted">模组要靠加载器 CesiumLoader 才能运行。点一下，就会把加载器${s.embeddedVersion ? ` v${esc(s.embeddedVersion)}` : ''}和${count ? ` ${count} 个` : ''}内置模组一起装进游戏目录。不需要联网，以后可以在「模组」页开关或卸载。</p>
+        <p class="v2-muted">模组不是游戏官方提供的，在线使用可能违反游戏规则，风险自负。</p>
         ${s.gameRunning ? `<div class="v2-notice">${ICON.info}<span>游戏正在运行：可以安装，但要重启游戏才生效</span></div>` : ''}
         ${g.exeName && !isAstralExe(g.exeName) ? `<div class="v2-notice">${ICON.info}<span>这个目录的主程序是 ${esc(g.exeName)}，看起来不是吉星派对，请确认目录没选错</span></div>` : ''}
         <div class="v2-guide-target"><span class="v2-muted">装到</span><span class="mono" title="${esc(g.directory)}">${esc(g.directory)}</span>
@@ -476,19 +477,6 @@
     guideDone: () => { Guide.justInstalled = false; renderHome(); },
   };
 
-  /* ---------- 市场占位 ---------- */
-  function renderMarket() {
-    const root = $('v2Market'); if (!root) return;
-    root.innerHTML = `<div class="v2-page"><div class="v2-head"><h1>市场</h1></div>
-      <div class="v2-card v2-coming">
-        <div class="v2-coming-icon">${ICON.sparkles}</div>
-        <h2>Coming soon</h2>
-        <p>社区模组市场正在接入，暂时还不能在这里浏览和安装。</p>
-        <p class="v2-muted">现在想装模组：下载好的 DLL / ZIP 用「模组 → 导入模组」装进来。</p>
-        <button class="v2-btn line" data-v2page="mods" style="margin-top:10px">去模组页</button>
-      </div></div>`;
-  }
-
   // 给后面各页（v2-replays.js 等）用的公共件
   window.V2UI = { ICON, openMenu, closeMenu, openModal, closeModal, modalActions, armDanger, confirmDelete,
     setModalCancel: fn => { modalCancel = fn; } };
@@ -502,7 +490,6 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     mountTopbar();
-    renderMarket();
     renderHome();
 
     document.addEventListener('click', e => {

@@ -1,3 +1,10 @@
+> [!IMPORTANT]
+> **这是 AstralParty.Toys 的非官方修改版**（界面重做），不是原作者发布的版本。修改版的问题请不要找原作者。
+>
+> - 修改版的源码在这个仓库的 `redesign` 分支，成品会放在这个仓库的 [Releases](https://github.com/fenghuali91917878hajimi/AstralParty.Toys/releases)。
+> - 原项目：[higashitaniyume/AstralParty.Toys](https://github.com/higashitaniyume/AstralParty.Toys)，许可证 AGPL-3.0。
+> - 下面的内容来自原项目的 README，其中的下载链接、版本徽章、QQ 群和 Discord 都属于原项目。
+
 <div align="center">
 
 # AstralParty.Toys

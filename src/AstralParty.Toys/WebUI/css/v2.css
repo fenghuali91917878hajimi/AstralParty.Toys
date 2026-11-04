@@ -76,7 +76,7 @@ body.page-home-active .page-container { height: auto; }
 .nav-crumb-btn[data-page="home"] { order: 1; }
 .nav-crumb-btn[data-page="tools"] { order: 2; }
 .nav-crumb-btn[data-page="mods"] { order: 3; }
-.nav-crumb-btn[data-page="market"] { order: 4; }
+.nav-crumb-btn[data-page="workshop"] { order: 4; }
 .nav-crumb-btn[data-page="skins"] { order: 5; }
 .nav-crumb-btn[data-page="settings"] { order: 99; margin-top: auto; }
 .nav-crumb-btn[data-page="wiki"] { display: none; }
@@ -445,11 +445,6 @@ html body #globalModal .changelog-tab { border-radius: 6px; }
 html body #globalModal .changelog-tab.is-active { background: var(--v2-panel-2); color: #fff; box-shadow: none; border-color: transparent; }
 
 /* ---------- 市场占位 ---------- */
-.v2-coming { padding: 48px 24px; text-align: center; }
-.v2-coming-icon { width: 72px; height: 72px; margin: 0 auto 14px; border-radius: 20px; display: grid; place-items: center; background: var(--v2-pink-soft); color: var(--gp-pink); }
-.v2-coming-icon svg { width: 34px; height: 34px; }
-.v2-coming h2 { margin: 0 0 8px; font-size: 24px; }
-.v2-coming p { margin: 0 auto 8px; max-width: 420px; color: var(--gp-text-sub); }
 
 @media (prefers-reduced-motion: reduce) { .v2-jump-tip, .v2-jump-tip .bar { animation: none; transition: none; } }
 body.reduce-motion .v2-jump-tip, body.reduce-motion .v2-jump-tip .bar { animation: none; transition: none; }
@@ -489,3 +484,43 @@ body.reduce-motion .v2-guide-progress i { animation: none; width: 100%; opacity:
 .v2-un-title { display: block; margin-top: 12px; font-weight: 600; }
 .v2-un-opt { display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; cursor: pointer; line-height: 1.5; }
 .v2-un-opt input { margin-top: 3px; flex: none; }
+
+/* ---------- 市场（A+）：内容和逻辑是原版 workshop.js 画的，这里只统一外观 ----------
+   宽度和其他页面的 .v2-page 对齐（880 减两边 28 的内边距）；列表页不放粉色按钮，详情页只有「安装」是粉色。 */
+html body .workshop-page { --v2-ws-gutter: max(28px, calc((100% - 824px) / 2)); background: var(--gp-bg); font-size: 14px; }
+html body .workshop-page .utilities-header { padding: 24px var(--v2-ws-gutter) 12px; background: none; border: 0; box-shadow: none; backdrop-filter: none; min-height: 0; }
+html body .workshop-page .utilities-title-group { gap: 12px; }
+html body .workshop-page .utilities-header h2 { font-size: 22px; font-weight: 700; margin: 0; }
+html body .workshop-page .utilities-tagline { padding: 0; border: 0; background: none; color: var(--gp-text-muted); font-size: 13px; }
+html body #workshopBackHomeBtn { display: none; }
+html body .workshop-page .back-btn { height: 34px; padding: 0 12px; border: 1px solid var(--v2-border-strong); border-radius: 8px; background: none; box-shadow: none; color: var(--gp-text-sub); font-size: 14px; font-weight: 500; transform: none; }
+html body .workshop-page .back-btn:hover { background: var(--v2-hover); color: #fff; }
+html body .workshop-page .workshop-source { font-family: var(--v2-mono); font-size: 12px; }
+
+html body .workshop-page .workshop-toolbar { padding: 0 var(--v2-ws-gutter) 12px; background: none; border: 0; box-shadow: none; gap: 8px; }
+html body .workshop-page .workshop-search { height: 34px; border: 1px solid var(--v2-border-strong); border-radius: 8px; background: var(--gp-bg); box-shadow: none; }
+html body .workshop-page .workshop-select { height: 34px; min-height: 34px; padding-block: 0; border: 1px solid var(--v2-border-strong); border-radius: 8px; background-color: var(--gp-bg); box-shadow: none; font-size: 13px; }
+html body .workshop-page .workshop-scroll { padding: 4px var(--v2-ws-gutter) 40px; }
+html body .workshop-page .workshop-notice { padding-inline: 0; color: var(--gp-text-muted); }
+
+/* 按钮：和 .v2-btn 一样的尺寸和圆角 */
+html body .workshop-page :is(.secondary-btn, .primary-btn) { height: 34px; min-height: 34px; padding: 0 14px; border-radius: 8px; box-shadow: none; font-size: 14px; font-weight: 500; transform: none; animation: none; }
+html body .workshop-page .secondary-btn { border: 1px solid var(--v2-border-strong); background: none; color: var(--gp-text-sub); }
+html body .workshop-page .secondary-btn:hover:not(:disabled) { background: var(--v2-hover); color: #fff; }
+html body .workshop-page .primary-btn { border: 0; background: var(--gp-pink); color: #fff; }
+html body .workshop-page .primary-btn:hover:not(:disabled) { background: var(--gp-pink-hover); }
+html body #workshopGrid :is(.primary-btn, .secondary-btn) { border: 1px solid var(--v2-border-strong); background: none; color: var(--gp-text-sub); }
+html body #workshopGrid :is(.primary-btn, .secondary-btn):hover:not(:disabled) { background: var(--v2-hover); color: #fff; }
+
+/* 卡片和行：去掉渐变、发光和上浮 */
+html body .workshop-page :is(.workshop-row, .workshop-card, .workshop-detail-hero, .workshop-detail-section, .workshop-version-row) { background: var(--v2-panel); border: 1px solid var(--v2-border); border-radius: 10px; box-shadow: none; backdrop-filter: none; }
+html body .workshop-page :is(.workshop-row, .workshop-card):hover { background: var(--v2-panel); border-color: var(--v2-border-strong); box-shadow: none; transform: none; }
+html body .workshop-page :is(.workshop-row-title, .workshop-card-title, .workshop-detail-title) { font-weight: 600; text-shadow: none; }
+html body .workshop-page :is(.workshop-version, .workshop-mini-badge) { padding: 1px 7px; border: 0; border-radius: 4px; background: var(--v2-panel-2); color: var(--gp-text-sub); font-family: inherit; font-size: 12px; font-weight: 400; }
+html body .workshop-page .workshop-featured { border: 0; border-radius: 4px; background: rgba(250, 204, 21, .12); color: var(--gp-gold); box-shadow: none; font-size: 12px !important; font-weight: 400; }
+html body .workshop-page .workshop-cover-fallback { background: var(--v2-panel-2); color: var(--gp-text-muted); }
+html body .workshop-page .workshop-tab.is-active { color: var(--gp-pink); border-bottom-color: var(--gp-pink); box-shadow: none; }
+html body .workshop-page .workshop-detail-content { width: 100%; max-width: none; min-width: 0; margin: 0; padding: 8px 0 0; box-sizing: border-box; }
+html body .workshop-page :is(.workshop-facts, .workshop-detail-section) { border-radius: 10px; background: var(--v2-panel); border: 1px solid var(--v2-border); box-shadow: none; }
+html body .workshop-page :is(.workshop-download-link, .workshop-sha) { overflow-wrap: anywhere; }
+html body .workshop-page .workshop-detail-cover { border: 1px solid var(--v2-border); border-radius: 10px; box-shadow: none; }
