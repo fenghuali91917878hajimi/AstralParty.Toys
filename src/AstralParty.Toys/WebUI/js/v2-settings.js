@@ -21,7 +21,8 @@
   const motionOn = () => { try { return localStorage.getItem('motionEnabled') !== 'false'; } catch { return true; } };
   // AGPL-3.0：把修改版给别人用，要让对方能拿到对应的源码
   const SOURCE_URL = 'https://github.com/fenghuali91917878hajimi/AstralParty.Toys/tree/redesign';
-  const UPSTREAM_URL = 'https://github.com/higashitaniyume/AstralParty.Toys';
+  const ISSUES_URL = 'https://github.com/fenghuali91917878hajimi/AstralParty.Toys/issues';
+  const UPSTREAM_URL ='https://github.com/higashitaniyume/AstralParty.Toys';
   const MIRRORS = [['direct', '直连 GitHub'], ['gh-proxy', 'GH-Proxy 镜像'], ['ghfast', 'GHFast 镜像'], ['custom', '自定义镜像']];
 
   // 回放库设置：宿主收到缺字段会当成「默认 / 关闭」，所以每次都把四个字段一起送
@@ -118,6 +119,8 @@
         <div class="v2-row"><span class="k">软件更新</span><span class="v v2-muted" style="white-space:normal">修改版不会自动更新：作者的更新包是原版界面，装上会盖掉新界面。作者出新版后，要把改动合并进来再重新打包。</span></div>
         <div class="v2-row"><span class="k">修改版源码</span><span class="v" style="white-space:normal;font-family:var(--v2-mono);font-size:13px">${esc(SOURCE_URL)}</span>
           <button class="v2-btn ghost" data-v2g="copyUrl" data-url="${esc(SOURCE_URL)}">${I().copy}复制</button></div>
+        <div class="v2-row"><span class="k">问题反馈</span><span class="v" style="white-space:normal;font-family:var(--v2-mono);font-size:13px">${esc(ISSUES_URL)}</span>
+          <button class="v2-btn ghost" data-v2g="copyUrl" data-url="${esc(ISSUES_URL)}">${I().copy}复制</button></div>
         <div class="v2-row"><span class="k">原项目主页</span><span class="v" style="white-space:normal;font-family:var(--v2-mono);font-size:13px">${esc(UPSTREAM_URL)}</span>
           <button class="v2-btn ghost" data-v2g="copyUrl" data-url="${esc(UPSTREAM_URL)}">${I().copy}复制</button></div>
       </div>
