@@ -1,6 +1,7 @@
 > [!IMPORTANT]
 > **这是 AstralParty.Toys 的非官方修改版**（界面重做），不是原作者发布的版本。修改版的问题请不要找原作者。
 >
+> - **AI 声明：** 这个修改版的代码主要由 AI（Claude Code）编写，发布者是编程初学者，负责提需求、决定功能和实际测试，没有逐行审查全部代码。可能存在没发现的问题，请自行判断是否使用；重要数据建议先备份。
 > - 修改版的源码在这个仓库的 `redesign` 分支，成品会放在这个仓库的 [Releases](https://github.com/fenghuali91917878hajimi/AstralParty.Toys/releases)。
 > - 修改版的问题和建议请到这里反馈：[Issues](https://github.com/fenghuali91917878hajimi/AstralParty.Toys/issues)。
 > - 原项目：[higashitaniyume/AstralParty.Toys](https://github.com/higashitaniyume/AstralParty.Toys)，许可证 AGPL-3.0。
