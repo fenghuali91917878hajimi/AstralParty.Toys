@@ -29,6 +29,29 @@
   // 宿主推来的数据（概览只读，不主动改任何东西）
   const V2 = { modStatus: null, skins: null, chars: null, lastModStatusAsk: 0 };
 
+  /* ---------- 提示文字 ----------
+     宿主的提示沿用原版文案（后端不动），有些写给开发者看，或者提到新界面没有的按钮。这里只改这些，别的原样显示。
+     文字越长停留越久，免得还没看完就消失。 */
+  const TOAST_REWRITES = [
+    [/^加载器已安装到游戏目录[\s\S]*/, '加载器和内置模组装好了，启动游戏后生效。'],
+    [/^加载器文件已写入游戏目录[\s\S]*/, '加载器和内置模组装好了，重启游戏后生效。'],
+    [/这个目录里没有检测到游戏主程序[\s\S]*/, '这个文件夹里没找到游戏。请选择游戏 exe 所在的那个文件夹。'],
+    [/这个目录已经不在了，或里面没有 AstralParty\*\.exe。/, '这个文件夹已经不在了，或者里面没有游戏。'],
+    [/尚未选择有效的游戏目录，请先(在「模组管理」里选择|自动检测或手动选择)。/, '还没有可用的游戏目录，请先到「设置 → 游戏目录」里添加。'],
+    [/未能识别游戏目录，请先在「模组管理」里选择游戏目录。/, '还没有可用的游戏目录，请先到「设置 → 游戏目录」里添加。'],
+    [/自动检测未找到游戏目录，请点「选择…」手动指定。/, '自动检测没找到游戏目录，请到「设置 → 游戏目录」里添加。'],
+    [/如确定要覆盖，请勾选「允许覆盖其它 version\.dll」。/, '如确定要覆盖，请用模组页「高级操作 → 覆盖安装」。'],
+    [/如确定要降级，请勾选「允许降级安装较旧的加载器」；/, '如确定要降级，请到模组页「高级操作」里操作；'],
+    [/如确认要删除请勾选「[^」]*」。?/, '如确认要删除，请用模组页「高级操作 → 强制卸载」。'],
+  ];
+  const originalToast = window.toast;
+  window.toast = function (message) {
+    const text = TOAST_REWRITES.reduce((s, [from, to]) => s.replace(from, to), String(message ?? ''));
+    originalToast(text);
+    clearTimeout(originalToast._timer);
+    originalToast._timer = setTimeout(() => $('toast')?.classList.remove('show'), Math.min(10000, Math.max(3800, text.length * 90)));
+  };
+
   /* ---------- 小工具 ---------- */
   let menuFns = [];
   function openMenu(anchor, items) {
