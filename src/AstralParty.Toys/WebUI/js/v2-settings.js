@@ -19,6 +19,8 @@
   }
   const SOURCES = { steam: 'Steam 库', registry: '注册表', common: '常见位置', deep: '深度扫描' };
   const motionOn = () => { try { return localStorage.getItem('motionEnabled') !== 'false'; } catch { return true; } };
+  // AGPL-3.0：把修改版给别人用，要让对方能拿到对应的源码
+  const SOURCE_URL = 'https://github.com/fenghuali91917878hajimi/AstralParty.Toys/tree/redesign';
   const MIRRORS = [['direct', '直连 GitHub'], ['gh-proxy', 'GH-Proxy 镜像'], ['ghfast', 'GHFast 镜像'], ['custom', '自定义镜像']];
 
   // 回放库设置：宿主收到缺字段会当成「默认 / 关闭」，所以每次都把四个字段一起送
@@ -113,6 +115,8 @@
         <div class="v2-row"><span class="k">说明</span><span class="v" style="white-space:normal">这是<b>修改版</b>（界面重做），基于原作者 higashitaniyume 的 AstralParty.Toys 修改，不是原作者发布的版本。
           <br><span class="v2-muted">原项目使用 AGPL-3.0 许可证；遇到问题请先在这个修改版里排查，不要直接找原作者。</span></span></div>
         <div class="v2-row"><span class="k">软件更新</span><span class="v v2-muted" style="white-space:normal">修改版不会自动更新：作者的更新包是原版界面，装上会盖掉新界面。作者出新版后，要把改动合并进来再重新打包。</span></div>
+        <div class="v2-row"><span class="k">修改版源码</span><span class="v" style="white-space:normal;font-family:var(--v2-mono);font-size:13px">${esc(SOURCE_URL)}</span>
+          <button class="v2-btn ghost" data-v2g="copySource">${I().copy}复制</button></div>
         <div class="v2-row"><span class="k">原项目主页</span><span class="v v2-muted">在顶栏右上角的「GitHub」</span></div>
       </div>
 
@@ -219,6 +223,7 @@
     versionDetail: () => window.VersionModule?.showDetails(),
     changelog: () => window.VersionModule?.requestChangelog('app'),
     uninstall: () => post({ type: 'appUninstallInfo' }),
+    copySource: () => Promise.resolve(navigator.clipboard?.writeText(SOURCE_URL)).then(() => toast('已复制源码地址'), () => toast('复制失败：' + SOURCE_URL)),
   };
 
   document.addEventListener('click', ev => {
