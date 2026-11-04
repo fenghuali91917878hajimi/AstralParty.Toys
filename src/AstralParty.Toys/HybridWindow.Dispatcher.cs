@@ -23,7 +23,7 @@ public partial class HybridWindow
             if ((_loaderRecoveryBusy || _modPackageImportRunning || _modUpdateRunning || _modImportRunning || _workshopBusy)
                 && type is "modInstall" or "modUninstall" or "modDisableLoader" or "modRestoreLoader"
                     or "modDownloadUpdate" or "modImportPackage" or "modImport" or "modPickImport" or "modDelete" or "modToggle"
-                    or "speedhackInstall" or "speedhackUninstall" or "workshopInstall")
+                    or "speedhackInstall" or "speedhackUninstall" or "workshopInstall" or "appUninstall")
             {
                 if (type is "modDisableLoader" or "modRestoreLoader") Post(new { type = "modRecoveryDone" });
                 throw new InvalidOperationException("游戏文件操作正在进行（安装 / 更新 / 导入），请等待完成后再修改。");
@@ -734,6 +734,12 @@ public partial class HybridWindow
                     break;
                 case "closeWindow":
                     Close();
+                    break;
+                case "appUninstallInfo":
+                    HandleAppUninstallInfo();
+                    break;
+                case "appUninstall":
+                    await HandleAppUninstallAsync(root.Clone());
                     break;
             }
         }

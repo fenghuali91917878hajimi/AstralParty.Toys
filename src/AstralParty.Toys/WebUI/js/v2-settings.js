@@ -115,7 +115,71 @@
         <div class="v2-row"><span class="k">软件更新</span><span class="v v2-muted" style="white-space:normal">修改版不会自动更新：作者的更新包是原版界面，装上会盖掉新界面。作者出新版后，要把改动合并进来再重新打包。</span></div>
         <div class="v2-row"><span class="k">原项目主页</span><span class="v v2-muted">在顶栏右上角的「GitHub」</span></div>
       </div>
+
+      <div class="v2-card"><div class="v2-card-title"><span>卸载</span></div>
+        <div class="v2-row"><span class="k">卸载本程序</span><span class="v v2-muted" style="white-space:normal">删除这个程序。游戏里的加载器和模组、设置要不要一起删，下一步再选</span>
+          <button class="v2-btn danger" data-v2g="uninstall">${I().trash}卸载…</button></div>
+      </div>
     </div>`;
+  }
+
+  /* ---------- 卸载本程序 ----------
+     字段和消息见 docs/v2/模组与皮肤接口.md。默认只删程序：加载器里有用户的皮肤和配置，删了找不回，必须自己勾。 */
+  function uninstallLocked(html, cls) {
+    const m = U().openModal(html, cls);
+    U().setModalCancel(() => {});   // 正在卸载时不能用 Esc 或点背景关掉
+    return m;
+  }
+
+  function openUninstall(info) {
+    if (info.blockedReason) {
+      U().openModal(`<div class="v2-modal-head"><b>现在不能卸载</b><button class="v2-icon-btn" data-v2modal="close">${I().x}</button></div>
+        <div style="padding:16px 18px">${esc(info.blockedReason)}</div>
+        <div class="v2-modal-foot"><span class="v2-top-spacer"></span><button class="v2-btn ghost" data-v2modal="close">知道了</button></div>`, 'narrow');
+      return;
+    }
+    const games = (info.games || []).filter(g => g.hasLoader);
+    const managed = games.filter(g => g.managed), foreign = games.filter(g => !g.managed);
+    U().modalActions.v2gUninstallGo = () => {
+      const gameIds = [...document.querySelectorAll('[data-v2g-un-game]:checked')].map(c => c.dataset.v2gUnGame);
+      const removeSettings = !!$('v2gUnSettings')?.checked;
+      uninstallLocked(`<div style="padding:22px 18px"><b>正在卸载…</b><p class="v2-muted" style="margin:6px 0 0">请不要关闭程序。</p></div>`, 'narrow');
+      post({ type: 'appUninstall', gameIds, removeSettings });
+    };
+    const m = U().openModal(`
+      <div class="v2-confirm"><div class="v2-confirm-icon">${I().trash}</div>
+        <div><b class="v2-confirm-title">卸载 AstralParty.Toys（改）？</b>
+          <ul class="v2-confirm-lines">
+            <li>会删除程序 <span class="v2-un-path">${esc(info.exePath || '')}</span> 和它运行时解压的临时文件，无法撤销</li>
+            <li><b>回放不会删除</b>，在 <span class="v2-un-path">${esc(info.libraryRoot || '')}</span>，游戏本体也不会动</li></ul></div></div>
+      <div class="v2-un-opts">
+        ${info.gameRunning && managed.length ? `<div class="v2-notice">${I().info}<span>游戏正在运行，要移除加载器请先退出游戏</span></div>` : ''}
+        ${managed.length ? `<b class="v2-un-title">游戏里的加载器和模组</b>
+          <p class="v2-muted">不勾选的目录，游戏下次启动<b>仍会加载模组</b>。勾选后连同里面的皮肤、配置和日志一起删除，无法撤销。</p>
+          ${managed.map(g => `<label class="v2-un-opt"><input type="checkbox" data-v2g-un-game="${esc(g.id)}" ${info.gameRunning ? 'disabled' : ''}>
+            <span><span class="v2-tag">${esc(g.editionLabel || '')}</span> ${g.version ? `v${esc(g.version)}` : ''}<br><span class="v2-un-path">${esc(g.directory)}</span></span></label>`).join('')}` : ''}
+        ${foreign.map(g => `<p class="v2-muted"><span class="v2-tag">${esc(g.editionLabel || '')}</span> 目录里的 version.dll 不是本工具装的，不会动：<span class="v2-un-path">${esc(g.directory)}</span></p>`).join('')}
+        <b class="v2-un-title">设置和缓存</b>
+        <label class="v2-un-opt"><input type="checkbox" id="v2gUnSettings">
+          <span>一起删除<br><span class="v2-muted">游戏目录列表、回放库设置、下载的工具和网页缓存。如果还在用原版工具，它们共用这些设置，建议保留</span></span></label>
+      </div>
+      <div class="v2-modal-foot"><span class="v2-top-spacer"></span>
+        <button class="v2-btn ghost" data-v2modal="close" id="v2ConfirmNo">取消</button>
+        <button class="v2-btn danger-fill" data-v2modal="v2gUninstallGo">${I().trash}卸载</button></div>`, 'narrow');
+    U().armDanger(m);
+    $('v2ConfirmNo')?.focus();
+  }
+
+  function showUninstallResult(r) {
+    const removed = (r.removedLoaders || []).map(d => `<li>已移除加载器：<span class="v2-un-path">${esc(d)}</span></li>`).join('');
+    if (r.ok) {
+      uninstallLocked(`<div style="padding:22px 18px"><b>卸载完成，程序马上关闭</b>
+        <ul class="v2-confirm-lines">${removed}<li>关闭后几秒内会删除程序文件。如果它还在，直接手动删除就行：<span class="v2-un-path">${esc(r.exePath || '')}</span></li></ul></div>`, 'narrow');
+      return;
+    }
+    U().openModal(`<div class="v2-modal-head"><b>卸载没有完成</b><button class="v2-icon-btn" data-v2modal="close">${I().x}</button></div>
+      <div style="padding:16px 18px">${esc(r.message || '')}${removed ? `<ul class="v2-confirm-lines">${removed}</ul>` : ''}</div>
+      <div class="v2-modal-foot"><span class="v2-top-spacer"></span><button class="v2-btn ghost" data-v2modal="close">知道了</button></div>`, 'narrow');
   }
 
   function render() {
@@ -154,6 +218,7 @@
     maintainNow: () => post({ type: 'libraryMaintain' }),
     versionDetail: () => window.VersionModule?.showDetails(),
     changelog: () => window.VersionModule?.requestChangelog('app'),
+    uninstall: () => post({ type: 'appUninstallInfo' }),
   };
 
   document.addEventListener('click', ev => {
@@ -212,6 +277,8 @@
     if (vm?.render) { const o = vm.render; vm.render = function (...a) { const r = o.apply(this, a); render(); return r; }; }
     // 加了游戏目录后，扫描结果里的「已添加」要跟着变
     window.chrome?.webview?.addEventListener('message', e => {
+      if (e.data?.type === 'appUninstallInfo') return openUninstall(e.data.payload || {});
+      if (e.data?.type === 'appUninstallResult') return showUninstallResult(e.data.payload || {});
       if (e.data?.type !== 'gameProfiles' || !G.scan?.candidates) return;
       const dirs = new Set((e.data.payload?.profiles || []).map(p => String(p.directory).toLowerCase()));
       G.scan.candidates.forEach(c => { if (dirs.has(String(c.directory).toLowerCase())) c.alreadyAdded = true; });

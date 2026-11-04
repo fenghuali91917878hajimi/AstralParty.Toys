@@ -214,14 +214,14 @@
     },
     disable: () => confirm({
       title: '停用加载器？', ok: '停用',
-      lines: ['会<b>备份并删除</b>游戏目录里的 version.dll，游戏就不再加载模组', '模组、配置、日志<b>都保留</b>，之后点「恢复加载器」就回来了', status()?.gameRunning && '游戏正在运行，重启游戏后生效'],
+      lines: [`只影响这个目录：<b>${esc(status()?.gameDirectory || '')}</b>`, '会<b>备份并删除</b>游戏目录里的 version.dll，游戏就不再加载模组', '模组、配置、日志<b>都保留</b>，之后点「恢复加载器」就回来了', status()?.gameRunning && '游戏正在运行，重启游戏后生效'],
       onOk: () => MM()?.startRecovery(false),
     }),
     uninstall: () => {
       const s = status(), foreign = s.installed && !s.loaderManaged;
       confirm({
         title: foreign ? '强制卸载游戏目录里的 version.dll？' : '完整卸载 CesiumLoader？', ok: '卸载',
-        lines: [foreign ? '这个文件<b>不是本工具装的</b>，可能属于别的工具，删掉后那个工具也会失效' : null,
+        lines: [`只影响这个目录：<b>${esc(s.gameDirectory || '')}</b>`, foreign ? '这个文件<b>不是本工具装的</b>，可能属于别的工具，删掉后那个工具也会失效' : null,
           '会删除加载器和整个 <b>AstralParty_ModLoader</b> 文件夹，<b>包括所有模组、配置和日志</b>，无法撤销',
           s.installed && s.loaderManaged && '只是暂时不想用模组的话，用「停用加载器」更安全',
           s.gameRunning && '游戏正在运行，重启游戏后生效'],

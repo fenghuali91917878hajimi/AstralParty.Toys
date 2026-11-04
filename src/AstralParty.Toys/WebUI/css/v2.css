@@ -480,3 +480,12 @@ body.reduce-motion .v2-jump-tip, body.reduce-motion .v2-jump-tip .bar { animatio
 .v2-guide-progress i { display: block; width: 35%; height: 100%; border-radius: 2px; background: var(--gp-pink); animation: v2-guide-slide 1.2s ease-in-out infinite alternate; }
 @keyframes v2-guide-slide { from { margin-left: 0; } to { margin-left: 65%; } }
 body.reduce-motion .v2-guide-progress i { animation: none; width: 100%; opacity: .5; }
+
+/* ---------- 卸载本程序（设置页） ---------- */
+.v2-un-path { font-family: var(--v2-mono); font-size: 12px; word-break: break-all; }
+.v2-un-opts { padding: 0 18px 14px; font-size: 13px; }
+.v2-un-opts .v2-notice { margin-bottom: 10px; }
+.v2-un-opts p { margin: 4px 0 8px; line-height: 1.6; }
+.v2-un-title { display: block; margin-top: 12px; font-weight: 600; }
+.v2-un-opt { display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; cursor: pointer; line-height: 1.5; }
+.v2-un-opt input { margin-top: 3px; flex: none; }
