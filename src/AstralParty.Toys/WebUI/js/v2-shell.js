@@ -207,24 +207,144 @@
     return entries[0];
   }
 
+  /* ---------- 首次使用引导 ----------
+     显示哪一步完全看真实状态（有没有游戏目录、加载器装没装），不记「看过引导」，两步都完成后卡片自动消失。
+     只有「以后再说」记在 localStorage：不想用模组的人不用一直看到它。 */
+  const Guide = { scan: null, autoScanned: false, drive: '', othersOpen: false, installing: false, justInstalled: false, installTimer: null };
+  const GUIDE_SKIP_KEY = 'v2GuideSkipLoader';
+  const guideSkipped = () => { try { return localStorage.getItem(GUIDE_SKIP_KEY) === '1'; } catch { return false; } };
+  const isAstralExe = name => /^AstralParty/i.test(name || '');
+  const SCAN_SOURCES = { steam: 'Steam 库', registry: '注册表', common: '常见位置', deep: '深度扫描' };
+
+  function guideStartScan(mode, drive) {
+    Guide.scan = { mode, running: true, message: mode === 'deep' ? `正在扫描 ${drive}` : '正在查找…', candidates: [] };
+    post(mode === 'deep' ? { type: 'gameScanDeep', drive } : { type: 'gameScanQuick' });
+  }
+
+  function guideSteps(step) {
+    const item = (n, label) => `<span class="v2-guide-step ${n === step ? 'on' : n < step ? 'done' : ''}"><i>${n < step ? ICON.check : n}</i>${label}</span>`;
+    return `<div class="v2-guide-steps">${item(1, '找到游戏')}<span class="v2-guide-sep"></span>${item(2, '安装模组')}</div>`;
+  }
+
+  function guideScanRows(list, firstPrimary) {
+    return list.map(([c, i], n) => `<div class="v2-row">
+        <span class="k"><span class="v2-tag">${esc(c.editionLabel || '')}</span></span>
+        <span class="v v2-guide-cand">${esc(c.exeName || '')} ${c.valid ? '' : '<span class="v2-badge warn" title="没检测到标准 Unity 结构">结构可疑</span>'}
+          <span class="v2-muted">· ${SCAN_SOURCES[c.source] || ''}</span><br><span class="v2-muted mono">${esc(c.directory)}</span></span>
+        <button class="v2-btn ${firstPrimary && n === 0 ? 'primary' : 'line'}" data-v2="guideUse" data-i="${i}">用这个</button></div>`).join('');
+  }
+
+  // 第 1 步：还没有游戏目录。启动时已经查过一遍 Steam，这里再查注册表和常见位置，都只读。
+  function guideFindHtml() {
+    const sc = Guide.scan;
+    const hint = '<p class="v2-guide-hint">要找的是 <span class="mono">AstralParty</span> 开头的 exe 所在的文件夹。Steam 版通常在 <span class="mono">steamapps\\common\\Astral Party</span> 下面的子文件夹里。</p>';
+    let body;
+    if (!sc || sc.running) {
+      body = `<div class="v2-guide-body"><b>${sc?.mode === 'deep' ? '正在深度扫描' : '正在查找吉星派对'}…</b>
+        <p class="v2-muted">${esc(sc?.message || '正在读取游戏目录…')}${sc?.current ? `<br><span class="mono">${esc(sc.current)}</span>` : ''}</p>
+        <div class="v2-guide-progress"><i></i></div>
+        ${sc?.mode === 'deep' ? '<div class="v2-guide-actions"><button class="v2-btn ghost" data-v2="guideCancel">取消</button></div>' : ''}</div>`;
+    } else {
+      // 其他 Unity 游戏也可能被列出来，只把 AstralParty*.exe 放在前面（和设置页同样的处理）
+      const all = (sc.candidates || []).map((c, i) => [c, i]);
+      const main = all.filter(([c]) => isAstralExe(c.exeName)), others = all.filter(([c]) => !isAstralExe(c.exeName));
+      const othersHtml = others.length ? `<details class="v2-mini v2-guide-others" id="v2GuideOthers" ${Guide.othersOpen ? 'open' : ''}>
+          <summary>还找到 ${others.length} 个别的游戏（多半不是吉星派对）</summary>${guideScanRows(others, false)}</details>` : '';
+      if (main.length) {
+        body = `<div class="v2-guide-body"><b>${main.length === 1 ? '找到了吉星派对，确认一下目录对不对' : `找到 ${main.length} 个吉星派对，选一个作为当前游戏`}</b>
+            ${main.length > 1 ? '<p class="v2-muted">另一个以后可以在「设置 → 游戏目录」里添加。</p>' : ''}</div>
+          ${guideScanRows(main, true)}${othersHtml}
+          <div class="v2-row v2-guide-foot"><span class="v v2-muted">都不对？</span>
+            <button class="v2-btn ghost" data-v2="browseGame">${ICON.folder}手动选择…</button>
+            <button class="v2-btn ghost" data-v2="guideRescan">${ICON.refresh}重新查找</button></div>`;
+      } else {
+        const drives = AppState.gameProfiles?.drives || [];
+        // 取消或出错时宿主只给一句话（没有扫描结果），不能说成「没找到」
+        body = `<div class="v2-guide-body"><b>${sc.message ? esc(sc.message) : sc.mode === 'deep' ? '这个盘上没找到吉星派对' : '常见位置没找到吉星派对'}</b>
+            <p class="v2-muted">请先确认游戏已经安装。然后可以直接选择游戏文件夹，或者对某个盘做深度扫描（会慢一些）。</p>
+            <div class="v2-guide-actions">
+              <select id="v2GuideDrive" class="v2-select" style="min-width:90px">${drives.map(d => `<option ${d === Guide.drive ? 'selected' : ''}>${esc(d)}</option>`).join('')}</select>
+              <button class="v2-btn line" data-v2="guideDeep" ${drives.length ? '' : 'disabled'}>${ICON.search}深度扫描</button>
+              <button class="v2-btn ghost" data-v2="guideRescan">${ICON.refresh}重新查找</button>
+              <span class="v2-top-spacer"></span>
+              <button class="v2-btn primary" data-v2="browseGame">${ICON.folder}手动选择文件夹…</button></div></div>${othersHtml}`;
+      }
+    }
+    return `<div class="v2-page"><div class="v2-head"><h1>开始使用</h1></div>
+      <div class="v2-card v2-guide">${guideSteps(1)}${body}</div>${hint}</div>`;
+  }
+
+  // 第 2 步要不要显示、显示哪种。停用 / DLL 缺失不算第一次安装，交给模组页处理
+  function guideLoaderState(g, s) {
+    if (!s || !s.gameDirectory || g.directoryExists === false || s.loaderMissing) return null;
+    if (s.installed) return s.loaderManaged ? null : 'foreign';
+    return s.bundleLoaderPresent === false ? 'bundle' : 'install';
+  }
+
+  function guideInstallHtml(g, s, state) {
+    if (Guide.justInstalled) {
+      const on = (s?.mods || []).filter(m => m.enabled !== false).length;
+      return `<div class="v2-card v2-guide">${guideSteps(3)}
+        <div class="v2-guide-body"><b>模组装好了</b>
+          <p class="v2-muted">${on} / ${(s?.mods || []).length} 个模组已启用，${s?.gameRunning ? '游戏正在运行，重启游戏后生效' : '启动游戏后生效'}。想开关或配置模组，去「模组」页。</p>
+          <div class="v2-guide-actions"><span class="v2-top-spacer"></span>
+            <button class="v2-btn ghost" data-v2page="mods">去模组页</button>
+            <button class="v2-btn ghost" data-v2="guideDone">知道了</button></div></div></div>`;
+    }
+    if (!state || guideSkipped()) return '';
+    const later = '<button class="v2-btn ghost" data-v2="guideSkip">以后再说</button>';
+    let inner;
+    if (state === 'foreign') {
+      inner = `<b>游戏目录里已经有别的 version.dll</b>
+        <p class="v2-muted">它不是本工具装的（可能是旧版变速器或第三方文件），所以不能直接安装。去模组页看处理办法。</p>
+        <div class="v2-guide-actions"><span class="v2-top-spacer"></span>${later}
+          <button class="v2-btn primary" data-v2page="mods">去模组页处理</button></div>`;
+    } else if (state === 'bundle') {
+      inner = `<b>现在没法安装模组</b>
+        <p class="v2-muted">这个程序缺少内置的加载器文件，请换用完整发布包。</p>
+        <div class="v2-guide-actions"><span class="v2-top-spacer"></span>${later}</div>`;
+    } else {
+      const count = (window.ModsModule?.builtInMods || []).length;
+      inner = `<b>安装模组</b>
+        <p class="v2-muted">模组要靠加载器 CesiumLoader 才能运行。点一下，就会把加载器${s.embeddedVersion ? ` v${esc(s.embeddedVersion)}` : ''}和${count ? ` ${count} 个` : ''}内置模组一起装进游戏目录。不需要联网，以后可以在「模组」页开关或卸载。</p>
+        ${s.gameRunning ? `<div class="v2-notice">${ICON.info}<span>游戏正在运行：可以安装，但要重启游戏才生效</span></div>` : ''}
+        ${g.exeName && !isAstralExe(g.exeName) ? `<div class="v2-notice">${ICON.info}<span>这个目录的主程序是 ${esc(g.exeName)}，看起来不是吉星派对，请确认目录没选错</span></div>` : ''}
+        <div class="v2-guide-target"><span class="v2-muted">装到</span><span class="mono" title="${esc(g.directory)}">${esc(g.directory)}</span>
+          <button class="v2-btn ghost" data-v2="gameMenu" data-v2menu>换目录${ICON.down}</button></div>
+        <div class="v2-guide-actions"><span class="v2-top-spacer"></span>${later}
+          <button class="v2-btn primary big" data-v2="guideInstall" ${Guide.installing ? 'disabled' : ''}>${ICON.download}${Guide.installing ? '正在安装…' : '安装模组'}</button></div>`;
+    }
+    return `<div class="v2-card v2-guide">${guideSteps(2)}<div class="v2-guide-body">${inner}</div></div>`;
+  }
+
+  function guideInstallNow() {
+    Guide.installing = true;
+    clearTimeout(Guide.installTimer);
+    // 宿主出错会发 error；万一什么都没回，两分钟后解锁按钮（和原版 setBusy 的兜底一样）
+    Guide.installTimer = setTimeout(() => { Guide.installing = false; renderHome(); }, 120000);
+    post({ type: 'modInstall', overwriteDll: false, allowDowngrade: false, includeSample: true });   // 和模组页的安装按钮同一条消息
+    renderHome();
+  }
+
   function renderHome() {
     const root = $('v2Home');
     if (!root) return;
+    // 引导卡片里的下拉框和折叠区，重画后要保持用户刚才的选择
+    const driveEl = $('v2GuideDrive'), othersEl = $('v2GuideOthers');
+    if (driveEl) Guide.drive = driveEl.value;
+    if (othersEl) Guide.othersOpen = othersEl.open;
     const g = activeGame();
     if (!g) {
-      // 还没有游戏目录（完整引导页在后续阶段做；这里先给出两条路）
-      root.innerHTML = `<div class="v2-page"><div class="v2-head"><h1>欢迎</h1></div>
-        <div class="v2-card">
-          <div class="v2-hero"><div class="v2-hero-art">★</div><div class="v2-hero-text">
-            <div class="v2-hero-title">第一次安装需要游戏文件夹</div>
-            <div class="v2-hero-sub">回放、模组、皮肤都要用到游戏目录。找到以后随时可以在设置里改。</div></div></div>
-          <div class="v2-row" style="justify-content:flex-end;gap:8px">
-            <button class="v2-btn ghost" data-v2="browseGame">${ICON.folder}手动选择文件夹…</button>
-            <button class="v2-btn primary big" data-v2="scanQuick">${ICON.search}自动查找</button></div>
-        </div></div>`;
+      // 打开就自动查一次（只读）；要等游戏目录数据回来，才能确定是真的没有
+      if (AppState.gameProfiles && !Guide.scan && !Guide.autoScanned) { Guide.autoScanned = true; guideStartScan('quick'); }
+      root.innerHTML = guideFindHtml();
       return;
     }
     const s = V2.modStatus;
+    const guideState = guideLoaderState(g, s);
+    const guideHtml = guideInstallHtml(g, s, guideState);
+    // 每页只有一个粉色主按钮：引导还没走完时，启动按钮让位
+    const launchCls = guideHtml && !Guide.justInstalled && guideState !== 'bundle' ? 'line' : 'primary';
     const busy = launchBusy(), locked = modeLocked();
     const last = latestReplay();
     const cardSkin = V2.skins && (V2.skins.profiles || []).find(p => p.name?.toLowerCase() === (V2.skins.activeSkin || '').toLowerCase());
@@ -237,6 +357,7 @@
 
     root.innerHTML = `<div class="v2-page">
       <div class="v2-head"><h1>概览</h1></div>
+      ${guideHtml}
       <div class="v2-card">
         <div class="v2-hero">
           <div class="v2-hero-art game-icon"><img src="images/astralparty-game-icon.png" alt="吉星派对"></div>
@@ -246,8 +367,8 @@
             <div class="v2-hero-sub">${s ? esc(loaderText(s)) : '正在读取加载器状态…'}</div>
           </div>
           <div class="v2-split">
-            <button class="v2-btn primary big" data-v2="launch" ${busy ? 'disabled' : ''}>${ICON.play}${busy ? '正在启动…' : '启动游戏'}</button>
-            <button class="v2-btn primary big" data-v2="launchMenu" data-v2menu title="启动方式">${ICON.down}</button>
+            <button class="v2-btn ${launchCls} big" data-v2="launch" ${busy ? 'disabled' : ''}>${ICON.play}${busy ? '正在启动…' : '启动游戏'}</button>
+            <button class="v2-btn ${launchCls} big" data-v2="launchMenu" data-v2menu title="启动方式">${ICON.down}</button>
           </div>
         </div>
         <div class="v2-row"><span class="k">游戏目录</span><span class="v mono" title="${esc(g.directory)}">${esc(g.directory)}</span>
@@ -324,6 +445,35 @@
     },
     scanQuick: () => { showPage('settings'); window.GameLibModule?.startQuickScan?.(); },
     browseGame: () => post({ type: 'gameProfileBrowse' }),
+    guideRescan: () => { guideStartScan('quick'); renderHome(); },
+    guideDeep: () => { const d = $('v2GuideDrive')?.value; if (d) { Guide.drive = d; guideStartScan('deep', d); renderHome(); } },
+    guideCancel: () => post({ type: 'gameScanCancel' }),
+    guideUse: el => {
+      const c = Guide.scan?.candidates?.[Number(el.dataset.i)];
+      if (c) post({ type: 'gameProfileAddPath', directory: c.directory, activate: true });
+    },
+    guideInstall: () => {
+      const g = activeGame();
+      if (Guide.installing || !g) return;
+      if (!g.exeName || isAstralExe(g.exeName)) return guideInstallNow();
+      // 手动选的目录可能是别的 Unity 游戏：装之前再确认一次
+      modalActions.confirmYes = () => { closeModal(); guideInstallNow(); };
+      const m = openModal(`
+        <div class="v2-confirm"><div class="v2-confirm-icon" style="background:rgba(250,204,21,.12);color:var(--gp-gold)">${ICON.download}</div>
+          <div><b class="v2-confirm-title">这个目录看起来不是吉星派对，还要安装吗？</b>
+            <ul class="v2-confirm-lines"><li>主程序是 <b>${esc(g.exeName)}</b>，不是 AstralParty 开头</li>
+              <li>加载器会写进：${esc(g.directory)}</li>
+              <li>只有渠道版改过主程序名才需要继续，否则请取消后换目录</li></ul></div></div>
+        <div class="v2-modal-foot"><span class="v2-top-spacer"></span><button class="v2-btn ghost" data-v2modal="close" id="v2ConfirmNo">取消</button>
+          <button class="v2-btn danger-fill" data-v2modal="confirmYes">仍然安装</button></div>`, 'narrow');
+      armDanger(m); $('v2ConfirmNo')?.focus();
+    },
+    guideSkip: () => {
+      try { localStorage.setItem(GUIDE_SKIP_KEY, '1'); } catch { /* 存不了就隐藏不了，不影响使用 */ }
+      renderHome();
+      toast('以后想装模组，去「模组」页点「安装加载器」');
+    },
+    guideDone: () => { Guide.justInstalled = false; renderHome(); },
   };
 
   /* ---------- 市场占位 ---------- */
@@ -382,10 +532,34 @@
         if (b) { b.title = msg.maximized ? '还原' : '最大化'; b.setAttribute('aria-label', b.title); }
         return;
       }
-      case 'modStatus': V2.modStatus = msg.payload?.status ?? msg.payload; break;
+      case 'modStatus':
+        V2.modStatus = msg.payload?.status ?? msg.payload;
+        // 只有真的装好才算完成：安装前发出的状态请求也可能在这时才回来
+        if (Guide.installing && V2.modStatus?.installed && V2.modStatus?.loaderManaged) {
+          Guide.installing = false; Guide.justInstalled = true; clearTimeout(Guide.installTimer);
+        }
+        break;
+      case 'error':
+        if (!Guide.installing) return;
+        Guide.installing = false; clearTimeout(Guide.installTimer);
+        break;
+      case 'gameScanProgress': {
+        const p = msg.payload || {};
+        Guide.scan = { mode: p.mode, running: !!p.running, message: p.message, current: p.current, candidates: Guide.scan?.candidates || [] };
+        break;
+      }
+      case 'gameScanResult':
+        Guide.scan = { mode: msg.payload?.mode, running: false, candidates: msg.payload?.candidates || [] };
+        break;
       case 'skinsProfiles': V2.skins = msg.payload; break;
       case 'characterSkins': V2.chars = msg.payload; break;
-      case 'gameProfiles': case 'replayLibrary': case 'homeData': case 'steamBypassSync': break;
+      case 'gameProfiles':
+        // 程序启动时，概览可能赶在自动添加游戏之前要过状态，那份没有游戏目录，这里补要一次
+        if ((msg.payload?.profiles || []).some(p => p.active) && !V2.modStatus?.gameDirectory) {
+          V2.lastModStatusAsk = Date.now(); post({ type: 'modStatus' });
+        }
+        break;
+      case 'replayLibrary': case 'homeData': case 'steamBypassSync': break;
       default: return;
     }
     if (AppState.currentPage === 'home') setTimeout(renderHome);   // 等原版处理完（比如头像、单选框）再画
