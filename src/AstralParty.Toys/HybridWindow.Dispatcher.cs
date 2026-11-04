@@ -57,6 +57,7 @@ public partial class HybridWindow
                     }
                     await SendReplayLibraryAsync(runMaintain: true);
                     Post(new { type = "librarySettings", payload = BuildLibrarySettingsPayload() });
+                    ScheduleStartupUpdateCheck();
                     var args = Environment.GetCommandLineArgs();
                     if (args.Length > 1 && File.Exists(args[1])) await LoadReplayAsync(args[1]);
                     break;
@@ -75,6 +76,21 @@ public partial class HybridWindow
                     break;
                 case "loaderChangelogGet":
                     _ = PostLoaderChangelogAsync(root.TryGetProperty("fresh", out var freshEl) && freshEl.ValueKind == JsonValueKind.True);
+                    break;
+                case "getAppUpdateState":
+                    PostUpdateState(_currentUpdateStatus);
+                    break;
+                case "checkAppUpdate":
+                    _ = CheckAppUpdateAsync(userInitiated: true);
+                    break;
+                case "startAppUpdateDownload":
+                    _ = StartAppUpdateDownloadAsync();
+                    break;
+                case "cancelAppUpdateDownload":
+                    CancelAppUpdateDownload();
+                    break;
+                case "applyAppUpdate":
+                    ApplyAppUpdate(silent: true);
                     break;
                 case "openReplay":
                     await PickAndLoadReplayAsync();
@@ -144,13 +160,19 @@ public partial class HybridWindow
                     {
                         var targetLang = langProp.GetString();
                         var normLang = AppLanguage.Normalize(targetLang);
+                        var curSettings = _libraryService.Settings;
                         _libraryService.SaveSettings(new ReplayLibrarySettings
                         {
-                            LibraryRoot = _libraryService.Settings.LibraryRoot,
-                            AutoMaintain = _libraryService.Settings.AutoMaintain,
-                            KeepInGame = _libraryService.Settings.KeepInGame,
+                            LibraryRoot = curSettings.LibraryRoot,
+                            AutoMaintain = curSettings.AutoMaintain,
+                            KeepInGame = curSettings.KeepInGame,
                             Language = normLang,
-                            WorkshopUrl = _libraryService.Settings.WorkshopUrl
+                            WorkshopUrl = curSettings.WorkshopUrl,
+                            AutoCheckUpdates = curSettings.AutoCheckUpdates,
+                            AutoDownloadUpdates = curSettings.AutoDownloadUpdates,
+                            AutoInstallUpdates = curSettings.AutoInstallUpdates,
+                            GitHubMirrorType = curSettings.GitHubMirrorType,
+                            CustomGitHubMirrorUrl = curSettings.CustomGitHubMirrorUrl
                         });
                         _analyzer?.Reload(normLang);
                         Post(new { type = "librarySettings", payload = BuildLibrarySettingsPayload() });
@@ -299,7 +321,9 @@ public partial class HybridWindow
                     await HandleLoaderRecoveryAsync(false);
                     break;
                 case "modRestoreLoader":
-                    await HandleLoaderRecoveryAsync(true);
+                    var restoreMirrorType = root.TryGetProperty("mirrorType", out var rmt) ? rmt.GetString() : null;
+                    var restoreCustomUrl = root.TryGetProperty("customMirrorUrl", out var rcu) ? rcu.GetString() : null;
+                    await HandleLoaderRecoveryAsync(true, restoreMirrorType, restoreCustomUrl);
                     break;
                 case "modUninstall":
                     var modForce = root.TryGetProperty("force", out var modForceElement) && modForceElement.GetBoolean();
@@ -476,14 +500,18 @@ public partial class HybridWindow
                         root.TryGetProperty("accept", out var workshopAccept) && workshopAccept.GetBoolean());
                     break;
                 case "modCheckUpdate":
-                    _ = HandleModCheckUpdateAsync();
+                    var checkMirrorType = root.TryGetProperty("mirrorType", out var cmt) ? cmt.GetString() : null;
+                    var checkCustomUrl = root.TryGetProperty("customMirrorUrl", out var ccu) ? ccu.GetString() : null;
+                    _ = HandleModCheckUpdateAsync(checkMirrorType, checkCustomUrl);
                     break;
                 case "modDownloadUpdate":
                     var updateOverwrite = root.TryGetProperty("overwriteDll", out var updateOverwriteElement) &&
                                           updateOverwriteElement.GetBoolean();
                     var updateAllowDowngrade = root.TryGetProperty("allowDowngrade", out var updateDowngradeElement) &&
                                                updateDowngradeElement.GetBoolean();
-                    _ = HandleModDownloadUpdateAsync(updateOverwrite, updateAllowDowngrade);
+                    var dlMirrorType = root.TryGetProperty("mirrorType", out var dmt) ? dmt.GetString() : null;
+                    var dlCustomUrl = root.TryGetProperty("customMirrorUrl", out var dcu) ? dcu.GetString() : null;
+                    _ = HandleModDownloadUpdateAsync(updateOverwrite, updateAllowDowngrade, dlMirrorType, dlCustomUrl);
                     break;
                 case "characterSchemesCreate":
                 case "characterSchemesSave":

@@ -19,6 +19,7 @@
   }
   const SOURCES = { steam: 'Steam 库', registry: '注册表', common: '常见位置', deep: '深度扫描' };
   const motionOn = () => { try { return localStorage.getItem('motionEnabled') !== 'false'; } catch { return true; } };
+  const MIRRORS = [['direct', '直连 GitHub'], ['gh-proxy', 'GH-Proxy 镜像'], ['ghfast', 'GHFast 镜像'], ['custom', '自定义镜像']];
 
   // 回放库设置：宿主收到缺字段会当成「默认 / 关闭」，所以每次都把四个字段一起送
   function saveLibrary(patch) {
@@ -57,6 +58,7 @@
   function html() {
     const cap = LS().capacity || 10, keep = LS().keepInGame || cap;
     const info = window.VersionModule?.info;
+    const mirror = LS().githubMirrorType || 'gh-proxy';
     return `<div class="v2-page">
       <div class="v2-head"><h1>设置</h1></div>
 
@@ -93,6 +95,13 @@
           <button class="v2-btn line" data-v2g="maintainNow">整理</button></div>
       </div>
 
+      <div class="v2-card"><div class="v2-card-title"><span>网络</span></div>
+        <div class="v2-row"><span class="k">下载镜像</span><span class="v v2-muted" style="white-space:normal">从 GitHub 下载加载器时走哪条线路。镜像是第三方服务器，能直连 GitHub 就选直连</span>
+          <select id="v2gMirror" class="v2-select">${MIRRORS.map(([k, l]) => `<option value="${k}" ${mirror === k ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
+        ${mirror === 'custom' ? `<div class="v2-row"><span class="k">镜像地址</span><span class="v v2-muted">留空就是直连</span>
+          <input id="v2gMirrorUrl" class="v2-select" style="min-width:260px" placeholder="https://example.com/" value="${esc(LS().customGitHubMirrorUrl || '')}"></div>` : ''}
+      </div>
+
       <div class="v2-card"><div class="v2-card-title"><span>关于</span></div>
         <div class="v2-row"><span class="k">版本</span>
           <span class="v">${info?.version ? `v${esc(info.version)}${info.isLocalBuild ? ' <span class="v2-tag">本地构建</span>' : ''}` : '<span class="v2-muted">读取中…</span>'}
@@ -103,6 +112,7 @@
         <div class="v2-row"><span class="k">内置加载器</span><span class="v v2-muted">${esc(info?.embeddedLoaderVersion ? 'CesiumLoader v' + String(info.embeddedLoaderVersion).replace(/^v/i, '') : '没有内嵌发布包')}</span></div>
         <div class="v2-row"><span class="k">说明</span><span class="v" style="white-space:normal">这是<b>修改版</b>（界面重做），基于原作者 higashitaniyume 的 AstralParty.Toys 修改，不是原作者发布的版本。
           <br><span class="v2-muted">原项目使用 AGPL-3.0 许可证；遇到问题请先在这个修改版里排查，不要直接找原作者。</span></span></div>
+        <div class="v2-row"><span class="k">软件更新</span><span class="v v2-muted" style="white-space:normal">修改版不会自动更新：作者的更新包是原版界面，装上会盖掉新界面。作者出新版后，要把改动合并进来再重新打包。</span></div>
         <div class="v2-row"><span class="k">原项目主页</span><span class="v v2-muted">在顶栏右上角的「GitHub」</span></div>
       </div>
     </div>`;
@@ -181,6 +191,8 @@
     }
     if (t.id === 'v2gAuto') return saveLibrary({ autoMaintain: t.checked });
     if (t.id === 'v2gKeep') return saveLibrary({ keepInGame: t.value });
+    if (t.id === 'v2gMirror') return saveLibrary({ githubMirrorType: t.value });
+    if (t.id === 'v2gMirrorUrl') return saveLibrary({ customGitHubMirrorUrl: t.value.trim() });
   });
 
   // 原版这些数据回来时重画

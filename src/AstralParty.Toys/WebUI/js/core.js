@@ -176,7 +176,12 @@ function showPage(pageName, options = {}) {
 document.addEventListener('DOMContentLoaded', () => {
   // Navigation breadcrumbs
   document.querySelectorAll('.nav-crumb-btn').forEach(btn => {
-    btn.addEventListener('click', () => showPage(btn.dataset.page));
+    btn.addEventListener('click', () => {
+      if (btn.dataset.page === 'workshop') {
+        window.WorkshopModule?.clearDetailReturn?.();
+      }
+      showPage(btn.dataset.page);
+    });
   });
 
   // Brand logo click returns to home（role=button，补上键盘 Enter/Space）
@@ -249,6 +254,11 @@ host?.addEventListener('message', event => {
       window.ReplayModule?.renderDownloadState(msg.payload);
       break;
 
+    case 'appUpdateState':
+      AppState.appUpdateState = msg.payload;
+      window.SettingsModule?.renderUpdateState(msg.payload);
+      break;
+
     case 'librarySettings':
       AppState.librarySettings = msg.payload;
       if (msg.payload?.language && msg.payload.language !== window.i18n?.lang) {
@@ -257,6 +267,9 @@ host?.addEventListener('message', event => {
       if (window.SettingsModule) {
         window.SettingsModule.init();
         window.SettingsModule.applyLibrarySettings(msg.payload);
+      }
+      if (window.ModsModule) {
+        window.ModsModule.applyLibrarySettings?.(msg.payload);
       }
       break;
 
