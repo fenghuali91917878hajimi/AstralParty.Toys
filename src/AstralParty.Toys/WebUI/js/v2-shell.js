@@ -478,7 +478,23 @@
   };
 
   // 给后面各页（v2-replays.js 等）用的公共件
-  window.V2UI = { ICON, openMenu, closeMenu, openModal, closeModal, modalActions, armDanger, confirmDelete,
+  /* 搜索框：结果要重画页面，但输入法还在拼字时不能重画，否则拼音会被打断、叠在一起（实测：nihao 变成 nninihniha…）。
+     所以拼字期间不搜索，选完字（compositionend）再搜；各页的 render() 开头用 isComposing() 挡住其他消息触发的重画。 */
+  let composingBox = null;
+  const isComposing = () => !!composingBox && composingBox === document.activeElement;
+  function bindSearch(id, apply) {
+    const box = $(id); if (!box) return;
+    const run = () => {
+      apply(box.value);
+      const n = $(id);
+      if (n) { n.focus(); n.setSelectionRange(n.value.length, n.value.length); }
+    };
+    box.oninput = e => { if (!e.isComposing) run(); };
+    box.oncompositionstart = () => { composingBox = box; };
+    box.oncompositionend = () => { composingBox = null; run(); };
+  }
+
+  window.V2UI = { ICON, openMenu, closeMenu, openModal, closeModal, modalActions, armDanger, confirmDelete, bindSearch, isComposing,
     setModalCancel: fn => { modalCancel = fn; } };
 
   /* ---------- 接线 ---------- */

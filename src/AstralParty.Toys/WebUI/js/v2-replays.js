@@ -179,15 +179,11 @@
   /* ---------- 渲染与事件 ---------- */
   function render() {
     const root = $('v2Replays'), tv = $('toolsView');
-    if (!root || !tv) return;
+    if (!root || !tv || U().isComposing()) return;
     const detail = !!RM()?.detailOpen;
     tv.classList.toggle('v2-list-mode', !detail);
     root.innerHTML = detail ? detailHtml() : listHtml();
-    const box = $('v2rq');
-    if (box) box.oninput = ev => {
-      R.q = ev.target.value; render();
-      const n = $('v2rq'); n.focus(); n.setSelectionRange(n.value.length, n.value.length);
-    };
+    U().bindSearch('v2rq', v => { R.q = v; render(); });
   }
 
   const actions = {

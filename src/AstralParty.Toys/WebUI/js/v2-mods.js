@@ -65,7 +65,8 @@
     const sp = baseSpeed(), on = sp > 1.0001, sm = speedMod(), hk = sm && sm.enabled !== false;
     const enabled = mods().filter(m => m.enabled !== false).length;
     const q = M.q.trim().toLowerCase();
-    const list = mods().filter(m => !q || [m.displayName, m.name, m.fileName, m.description, m.author].some(v => String(v ?? '').toLowerCase().includes(q)));
+    const list = mods().filter(m => !q || [m.displayName, m.name, m.fileName, m.description, m.author].some(v => String(v ?? '').toLowerCase().includes(q)))
+      .sort((a, b) => isBuiltIn(a) - isBuiltIn(b));   // 自己装的排前面：内置有 21 个，从市场新装的混在中间很难找
 
     return `<div class="v2-page">${head(!loaderIsPrimary)}
       ${s.gameRunning ? `<div class="v2-notice">${I().info}<span>游戏正在运行：改动会保存，重启游戏后生效</span></div>` : ''}
@@ -100,7 +101,7 @@
           return `<div class="v2-mod ${m.enabled === false ? 'off' : ''}">
             <div class="body">
               <div class="name">${esc(m.displayName || m.name || m.fileName)}${m.version ? `<span class="v2-tag">v${esc(m.version)}</span>` : ''}
-                ${isBuiltIn(m) ? '<span class="v2-tag" title="随加载器一起安装的内置模组">内置</span>' : ''}
+                ${isBuiltIn(m) ? '<span class="v2-tag" title="随加载器一起安装的内置模组">内置</span>' : '<span class="v2-tag" title="不是随加载器内置的：来自市场或手动导入">第三方</span>'}
                 ${(Number(m.permissions) & 2) ? '<span class="v2-badge warn" title="此模组声明可以操作游戏（模拟出牌 / 掷骰 / 移动等），请确认来源可信">可操作游戏</span>' : ''}</div>
               <div class="desc" title="${esc(m.description || '')}">${esc(m.description || '')}${deps ? `　<span class="v2-muted">依赖：${esc(deps)}</span>` : ''}</div>
             </div>
@@ -135,15 +136,13 @@
   }
 
   function render() {
-    const root = $('v2Mods'); if (!root) return;
+    const root = $('v2Mods'); if (!root || U().isComposing()) return;
     const adv = $('v2ModsAdv'); if (adv) M.advOpen = adv.open;
     const focusSearch = document.activeElement?.id === 'v2mq';
     root.innerHTML = html();
+    U().bindSearch('v2mq', v => { M.q = v; render(); });
     const box = $('v2mq');
-    if (box) {
-      box.oninput = e => { M.q = e.target.value; render(); };
-      if (focusSearch) { box.focus(); box.setSelectionRange(box.value.length, box.value.length); }
-    }
+    if (box && focusSearch) { box.focus(); box.setSelectionRange(box.value.length, box.value.length); }
   }
 
   /* ---------- 操作 ---------- */
@@ -271,6 +270,20 @@
     M.speedCfg = { ...(M.speedCfg || {}), speedhackBaseSpeed: v };
     render();
   }
+
+  // 市场上的名字和模组自己的名字可能不一样（实测：市场叫「保持神秘」，模组页叫「手牌查看」），装完要说清楚，不然像没装上
+  document.addEventListener('DOMContentLoaded', () => {
+    const wm = window.WorkshopModule;
+    if (typeof wm?.renderResult !== 'function') return;
+    const orig = wm.renderResult;
+    wm.renderResult = function (p) {
+      const sel = p?.id ? `#workshopGrid [data-mod-id="${CSS.escape(p.id)}"] :is(.workshop-row-title, .workshop-card-title)` : '';
+      const title = ((sel && document.querySelector(sel)) || document.querySelector('#workshopDetailView .workshop-detail-title'))?.textContent.trim();
+      const r = orig.call(this, p);
+      if (p?.success && p.name && title && p.name !== title) toast(`${p.message} 市场上的「${title}」在模组页叫「${p.name}」，排在列表最前面。`);
+      return r;
+    };
+  });
 
   // 原版这些方法跑完后重画（数据仍由原版保存：modStatus / builtInMods / updateInfo / 变速配置）
   document.addEventListener('DOMContentLoaded', () => {

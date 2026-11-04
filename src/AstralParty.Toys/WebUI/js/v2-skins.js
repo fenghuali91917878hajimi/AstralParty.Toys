@@ -289,7 +289,7 @@
   /* ---------- 渲染 ---------- */
   function render() {
     const root = $('v2Skins'), view = $('skinsView');
-    if (!root || !view) return;
+    if (!root || !view || U().isComposing()) return;
     view.classList.toggle('v2-own', ownTab());
     const t = tab();
     root.innerHTML = `<div class="v2-page ${t === 'characters' ? 'v2-frame-only' : ''}">${
@@ -299,10 +299,8 @@
       : window.V2Chars ? window.V2Chars.html()
       : frameHead()}</div>`;
     // 搜索框：重画后把焦点和光标放回去
-    [['v2sCardQ', v => { K.cardQ = v; }], ['v2sAQ', v => { K.aQ = v; K.aLimit = 200; }]].forEach(([id, set]) => {
-      const box = $(id); if (!box) return;
-      box.oninput = e => { set(e.target.value); render(); const n = $(id); n.focus(); n.setSelectionRange(n.value.length, n.value.length); };
-    });
+    U().bindSearch('v2sCardQ', v => { K.cardQ = v; render(); });
+    U().bindSearch('v2sAQ', v => { K.aQ = v; K.aLimit = 200; render(); });
   }
 
   // 给 v2-characters.js 用
