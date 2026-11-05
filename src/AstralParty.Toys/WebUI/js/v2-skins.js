@@ -45,7 +45,7 @@
       const sub = p.name === '__game_default__' ? '使用游戏内置卡面' : `${p.cardCount || 0} 张卡面${p.author ? ' · ' + esc(p.author) : ''}`;
       return `<button class="v2-scheme ${on ? 'active' : ''}" data-v2s-card="${esc(p.name)}">
         <div class="thumb" style="background:${p.name === '__game_default__' ? 'linear-gradient(135deg,#2d3558,#1f2438)' : thumbBg(p.name)}">${esc(pName(p).slice(0, 1))}${on ? '<span class="v2-badge pink">使用中</span>' : ''}</div>
-        <div class="info"><b>${esc(pName(p))}</b><small>${sub}</small></div></button>`;
+        <div class="info"><b title="${esc(pName(p))}">${esc(pName(p))}</b><small>${sub}</small></div></button>`;
     }).join('') || '<div class="v2-empty">还没有卡牌方案</div>'}</div>
     <details class="v2-card" style="margin-top:14px"><summary><div class="t"><b>更多</b><small>皮肤目录</small></div>${I().down}</summary>
       <div class="v2-adv"><div class="v2-row"><span class="n">打开皮肤目录</span><span class="d">所有卡牌方案存放的位置</span><button class="v2-btn line" data-v2s="cardFolder">打开</button></div></div></details>`;
@@ -154,7 +154,7 @@
       const on = p.id === aActive();
       return `<button class="v2-scheme ${on ? 'active' : ''}" data-v2s-audio="${esc(p.id)}">
         <div class="thumb" style="background:${p.id === 'default' ? 'linear-gradient(135deg,#2d3558,#1f2438)' : thumbBg(p.id)}">${I().sliders}${on ? '<span class="v2-badge pink">使用中</span>' : ''}</div>
-        <div class="info"><b>${esc(p.name || p.id)}</b><small>${p.id === 'default' ? '官方原版，只能试听' : `${p.ruleCount || 0} 项替换 / 静音${p.author ? ' · ' + esc(p.author) : ''}`}</small></div></button>`;
+        <div class="info"><b title="${esc(p.name || p.id)}">${esc(p.name || p.id)}</b><small>${p.id === 'default' ? '官方原版，只能试听' : `${p.ruleCount || 0} 项替换 / 静音${p.author ? ' · ' + esc(p.author) : ''}`}</small></div></button>`;
     }).join('') || '<div class="v2-empty">正在读取音效方案…</div>'}</div>
     <details class="v2-card" style="margin-top:14px"><summary><div class="t"><b>更多</b><small>原版音频包、方案目录</small></div>${I().down}</summary>
       <div class="v2-adv">
@@ -292,7 +292,7 @@
     if (!root || !view || U().isComposing()) return;
     view.classList.toggle('v2-own', ownTab());
     const t = tab();
-    root.innerHTML = `<div class="v2-page ${t === 'characters' ? 'v2-frame-only' : ''}">${
+    root.innerHTML = `<div class="v2-page ${t === 'characters' && !window.V2Chars ? 'v2-frame-only' : ''}">${
       t === 'cards' ? (K.cardScheme ? cardScheme() : cardsList())
       : t === 'audio' ? (K.audioScheme ? audioScheme() : audioList())
       : t === 'resource' ? resourceView()

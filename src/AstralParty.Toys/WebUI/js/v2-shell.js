@@ -120,10 +120,10 @@
     if (e.key === 'Escape' && $('v2Modal')?.classList.contains('show')) (modalCancel || closeModal)();
   });
 
-  /* ---------- 顶栏外部跳转（攻略 / GitHub） ----------
+  /* ---------- 顶栏外部跳转（WIKI / GitHub） ----------
      第一次点：按钮下方提示「再次点击跳转页面」，3 秒内再点才打开；两次点击至少隔 0.5 秒。 */
   const JUMPS = {
-    wiki: { name: 'BWiki 攻略', url: 'https://wiki.biligame.com/starengine/%E9%A6%96%E9%A1%B5' },
+    wiki: { name: 'BWiki', url: 'https://wiki.biligame.com/starengine/%E9%A6%96%E9%A1%B5' },
     github: { name: 'GitHub 仓库', url: 'https://github.com/fenghuali91917878hajimi/AstralParty.Toys' },   // 修改版的问题不要找原作者，原项目地址在设置 → 关于
   };
   const ARM_MS = 3000, GAP_MS = 500;
@@ -240,10 +240,10 @@
     box.style.cssText = 'display:flex;align-items:center;gap:4px';
     box.innerHTML = `
       <div class="v2-jump" id="v2UpdateJump" hidden><button class="v2-tb-btn v2-update-btn" data-v2jump="update"></button><div class="v2-jump-tip" role="status" aria-live="polite"></div></div>
-      <div class="v2-jump"><button class="v2-tb-btn" data-v2jump="wiki">${ICON.book}攻略</button><div class="v2-jump-tip" role="status" aria-live="polite"></div></div>
+      <div class="v2-jump"><button class="v2-tb-btn" data-v2jump="wiki">${ICON.book}WIKI</button><div class="v2-jump-tip" role="status" aria-live="polite"></div></div>
       <div class="v2-jump"><button class="v2-tb-btn" data-v2jump="github">${ICON.ext}GitHub</button><div class="v2-jump-tip" role="status" aria-live="polite"></div></div>
       <div class="v2-tb-sep"></div>`;
-    // 布局（仿 BazaarPlusPlus）：图标 名称 版本 …… 攻略 GitHub │ 最小化 最大化 关闭
+    // 布局（仿 BazaarPlusPlus）：图标 名称 版本 …… WIKI GitHub │ 最小化 最大化 关闭
     const brand = header.querySelector('.brand-section');
     if (brand && chip) brand.after(chip);
     const spacer = document.createElement('div'); spacer.className = 'v2-top-spacer';

@@ -272,14 +272,15 @@ details.v2-card[open] > summary svg { transform: rotate(180deg); }
 .v2-page.v2-frame-only { padding-bottom: 0; max-width: none; }
 
 .v2-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
-.v2-scheme { background: var(--v2-panel); border: 1px solid var(--v2-border); border-radius: 10px; overflow: hidden; cursor: pointer; text-align: left; padding: 0; color: #f3f5fa; }
+.v2-scheme { display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch; background: var(--v2-panel); border: 1px solid var(--v2-border); border-radius: 10px; overflow: hidden; cursor: pointer; text-align: left; padding: 0; color: #f3f5fa; }
 .v2-scheme:hover { border-color: var(--v2-border-strong); }
 .v2-scheme.active { border-color: rgba(255, 23, 118, .55); }
-.v2-scheme .thumb { aspect-ratio: 16 / 10; position: relative; display: grid; place-items: center; font-size: 30px; font-weight: 700; color: rgba(255, 255, 255, .8); }
+.v2-scheme .thumb { flex: none; width: 100%; aspect-ratio: 16 / 10; position: relative; display: grid; place-items: center; font-size: 30px; font-weight: 700; color: rgba(255, 255, 255, .8); }
 .v2-scheme .thumb svg { width: 28px; height: 28px; }
 .v2-scheme .thumb .v2-badge { position: absolute; top: 8px; left: 8px; background: rgba(18, 20, 32, .85); font-size: 12px; }
 .v2-scheme .info { padding: 10px 12px; }
-.v2-scheme .info b { font-weight: 500; display: block; }
+.v2-scheme .info { min-width: 0; }
+.v2-scheme .info b { font-weight: 500; display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .v2-scheme .info small { color: var(--gp-text-muted); font-size: 12px; }
 
 .v2-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
@@ -491,7 +492,7 @@ body.reduce-motion .v2-guide-progress i { animation: none; width: 100%; opacity:
 
 /* ---------- 市场（A+）：内容和逻辑是原版 workshop.js 画的，这里只统一外观 ----------
    宽度和其他页面的 .v2-page 对齐（880 减两边 28 的内边距）；列表页不放粉色按钮，详情页只有「安装」是粉色。 */
-html body .workshop-page { --v2-ws-gutter: max(28px, calc((100% - 824px) / 2)); background: var(--gp-bg); font-size: 14px; }
+html body .workshop-page { --v2-ws-gutter: max(28px, calc((100% - 840px) / 2)); background: var(--gp-bg); font-size: 14px; }
 html body .workshop-page .utilities-header { padding: 24px var(--v2-ws-gutter) 12px; background: none; border: 0; box-shadow: none; backdrop-filter: none; min-height: 0; }
 html body .workshop-page .utilities-title-group { gap: 12px; }
 html body .workshop-page .utilities-header h2 { font-size: 22px; font-weight: 700; margin: 0; }
@@ -536,7 +537,7 @@ html body .toast-container { width: max-content; max-width: min(480px, calc(100v
    粉色只留给「当前」那一张卡的启动按钮；每张卡的按钮放到信息下面，880 宽放不下左右排。 */
 #profilesView { display: block; overflow-y: auto; }
 #profilesView.hidden { display: none !important; }
-html body .profiles-page { --v2-pf-gutter: max(28px, calc((100% - 824px) / 2)); max-width: none; margin: 0; padding: 24px var(--v2-pf-gutter) 40px; background: var(--gp-bg); color: #f3f5fa; font-size: 14px; line-height: 1.5; }
+html body .profiles-page { --v2-pf-gutter: max(28px, calc((100% - 840px) / 2)); max-width: none; margin: 0; padding: 24px var(--v2-pf-gutter) 40px; background: var(--gp-bg); color: #f3f5fa; font-size: 14px; line-height: 1.5; }
 html body .profiles-page .profiles-header { margin-bottom: 14px; }
 html body .profiles-page .profiles-header h2 { font-size: 22px; font-weight: 700; margin: 0 0 4px; }
 html body .profiles-page .profiles-header p { margin: 0; color: var(--gp-text-muted); font-size: 13px; }
@@ -607,3 +608,10 @@ html body.v2-has-bg :is(.v2-modal-box, .v2-menu, dialog, #globalModal, .modal-co
 .v2-bg-tile .info b { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .v2-bg-tile .v2-bg-del { position: absolute; top: 6px; right: 6px; background: rgba(18, 20, 32, .85); opacity: 0; }
 .v2-bg-tile:hover .v2-bg-del, .v2-bg-tile:focus-within .v2-bg-del { opacity: 1; }
+
+/* ---------- 各页内容对齐：滚动条出现时内容不再左移；市场只有列表滚动，标题栏让出同样的宽度 ---------- */
+:is(#homeView.in-game-lobby, #modsView, #settingsView, #profilesView, #skinsView.v2-own #v2Skins, #toolsView.v2-list-mode #v2Replays) { scrollbar-gutter: stable; }
+html body .workshop-page .workshop-scroll { scrollbar-gutter: stable; }
+html body .workshop-page :is(.utilities-header, .workshop-toolbar) { padding-right: calc(var(--v2-ws-gutter) + 16px); }
+/* 原版 skins.css 在外层也留了滚动条位置，这里滚动的是 #v2Skins，不能留两次 */
+html body #skinsView.v2-own { scrollbar-gutter: auto; }

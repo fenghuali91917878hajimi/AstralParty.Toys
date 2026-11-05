@@ -50,7 +50,7 @@
         const id = field(p, 'id'), s = field(p, 'scheme'), on = !!field(p, 'active'), err = field(p, 'error');
         return `<button class="v2-scheme ${on ? 'active' : ''}" data-v2c-scheme="${esc(id)}">
           <div class="thumb" style="background:${err ? 'linear-gradient(135deg,#3a2f1a,#1f2438)' : VS().thumbBg(id)}">${err ? '!' : esc(String(field(s, 'name') || '?').slice(0, 1))}${on ? '<span class="v2-badge pink">已启用</span>' : ''}</div>
-          <div class="info"><b>${esc(field(s, 'name') || '未命名方案')}</b><small>${err ? '<span style="color:var(--gp-gold)">需要修复</span>' : `${peopleCount(p)} 个人物`}</small></div></button>`;
+          <div class="info"><b title="${esc(field(s, 'name') || '未命名方案')}">${esc(field(s, 'name') || '未命名方案')}</b><small>${err ? '<span style="color:var(--gp-gold)">需要修复</span>' : `${peopleCount(p)} 个人物`}</small></div></button>`;
       }).join('') || '<div class="v2-card v2-empty" style="grid-column:1/-1">还没有方案。新建一个，把喜欢的人物皮肤放进去，之后可以一键切换整套搭配。</div>'}</div>
       <p class="v2-muted" style="margin-top:12px">同一时间只能启用一个角色方案</p>
       <details class="v2-card" style="margin-top:14px"><summary><div class="t"><b>人物皮肤包</b><small>${packages().length} 个 · 导入、打开目录</small></div>${I().down}</summary>
