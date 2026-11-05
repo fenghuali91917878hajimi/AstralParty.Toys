@@ -85,7 +85,7 @@
           const source = cp ? (off ? '自定义 + 官方基础' : '自定义皮肤') : '官方皮肤';
           const summary = cp ? `${pk ? pkgName(pk) : '找不到皮肤包'}${off ? ' + ' + skinName(hero, off) : ''}` : skinName(hero, off);
           return `<div class="v2-row link" ${cp ? `data-v2c-pkg="${esc(cp)}"` : `data-v2c-rule="${esc(field(r, 'id'))}"`}>
-            <span class="k" style="color:#fff;font-weight:500">${esc(heroName(hero))}</span>
+            <span class="k" style="color:var(--v2-text);font-weight:500">${esc(heroName(hero))}</span>
             <span class="v" style="white-space:normal">${esc(summary)} <span class="v2-tag">${source}</span><br>
               <span class="v2-muted">${tgt ? '只替换「' + esc(skinName(hero, tgt)) + '」' : '替换这个人物的全部原皮肤'}</span></span>
             ${cp ? `<button class="v2-icon-btn" data-v2c-rule="${esc(field(r, 'id'))}" title="来源与替换范围">${I().sliders}</button><span class="v2-muted">编辑</span>` : ''}

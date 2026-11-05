@@ -231,6 +231,38 @@
     else checkUpdate().then(() => { if (Update.status === 'failed') { Update.status = 'idle'; drawUpdate(); } });
   }
 
+  /* ---------- 深浅色：左下角切换，选择存在 localStorage；html[data-theme] 由 index.html 开头设置 ---------- */
+  const THEME_KEY = 'v2Theme';
+  const THEME_ICON = {
+    sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></svg>',
+    moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11Z"/></svg>',
+  };
+  const isLight = () => document.documentElement.dataset.theme === 'light';
+  function drawThemeButton() {
+    const btn = $('v2ThemeBtn'); if (!btn) return;
+    // 按钮写的是点了会变成什么
+    const to = isLight() ? '深色' : '浅色';
+    btn.innerHTML = (isLight() ? THEME_ICON.moon : THEME_ICON.sun) + `<span>${to}</span>`;
+    btn.title = `切换到${to}模式`;
+    btn.setAttribute('aria-label', btn.title);
+  }
+  function toggleTheme() {
+    const light = !isLight();
+    if (light) document.documentElement.dataset.theme = 'light';
+    else delete document.documentElement.dataset.theme;
+    try { localStorage.setItem(THEME_KEY, light ? 'light' : 'dark'); } catch { /* 存不了只影响下次启动 */ }
+    drawThemeButton();
+  }
+  function mountThemeButton() {
+    const nav = document.querySelector('.nav-breadcrumbs');
+    if (!nav || $('v2ThemeBtn')) return;
+    const btn = document.createElement('button');
+    btn.id = 'v2ThemeBtn'; btn.className = 'v2-theme-btn'; btn.type = 'button';
+    btn.addEventListener('click', toggleTheme);
+    nav.append(btn);
+    drawThemeButton();
+  }
+
   function mountTopbar() {
     const header = document.querySelector('.global-header');
     const chip = $('appVersionChip');
@@ -596,6 +628,7 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     mountTopbar();
+    mountThemeButton();
     renderHome();
 
     // 收到版本号后才能比较新旧（包一层原版方法，不改它的行为）
