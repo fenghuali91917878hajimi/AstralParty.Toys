@@ -581,3 +581,29 @@ html body .profiles-page .profiles-card-actions { justify-content: flex-start; a
 html body .profiles-page .profiles-card-actions .danger-btn { margin-left: auto; }
 html body .profiles-page .profiles-mode-select { height: 34px; padding: 0 8px; border: 1px solid var(--v2-border-strong); border-radius: 8px; background: var(--gp-bg); box-shadow: none; color: var(--gp-text-sub); font-size: 13px; }
 html body .profiles-page .profiles-note { margin-top: 14px; color: var(--gp-text-muted); font-size: 12px; }
+
+/* ---------- 自定义背景：图层在最底下，界面表面按「界面不透明度」变透明；弹窗和菜单保持不透明 ---------- */
+:root { --v2-ui: .8; --v2-bg-blur: 12px; }
+#v2BgLayer { display: none; position: fixed; inset: -48px; z-index: 0; background: center / cover no-repeat; filter: blur(var(--v2-bg-blur)); }
+#v2BgLayer::after { content: ""; position: absolute; inset: 0; background: rgba(18, 20, 32, calc(var(--v2-ui) * .55)); }
+body.v2-has-bg #v2BgLayer { display: block; }
+body.v2-has-bg { --v2-panel: rgba(26, 29, 46, var(--v2-ui)); --v2-panel-2: rgba(32, 36, 58, var(--v2-ui)); --gp-bg-card: rgba(28, 35, 60, var(--v2-ui)); --gp-bg-panel: rgba(22, 27, 46, var(--v2-ui)); }
+/* 直接压在图上的次要文字要更亮；滚动条轨道不要盖一条底色 */
+html body.v2-has-bg { --gp-text-muted: #c6cddb; }
+html body.v2-has-bg ::-webkit-scrollbar-track { background: transparent; }
+html body.v2-has-bg ::-webkit-scrollbar-corner { background: transparent; }
+html body.v2-has-bg .app-shell { position: relative; z-index: 1; }
+html body.v2-has-bg :is(.app-shell, .page-container, .page-view, #homeView.in-game-lobby, .workshop-page, .profiles-page) { background: transparent; }
+/* 顶栏和侧栏最低 75%：导航文字和「（改）」标记（AGPL 要求）不能糊进图里 */
+html body.v2-has-bg :is(.global-header, .nav-breadcrumbs) { background: rgba(18, 20, 32, max(var(--v2-ui), .75)); }
+html body.v2-has-bg :is(.v2-modal-box, .v2-menu, dialog, #globalModal, .modal-content) { --v2-panel: #1a1d2e; --v2-panel-2: #20243a; --gp-bg-card: rgba(28, 35, 60, .98); --gp-bg-panel: rgba(22, 27, 46, .98); }
+
+.v2-bg-slider input[type="range"] { flex: 1; min-width: 0; accent-color: var(--gp-pink); }
+.v2-bg-slider input[type="range"]:disabled { opacity: .4; }
+.v2-bg-slider .k { flex: 0 0 96px; }
+.v2-bg-val { flex: 0 0 32px; text-align: right; font-variant-numeric: tabular-nums; color: var(--gp-text-sub); }
+.v2-bg-tile .thumb { background: var(--gp-bg); overflow: hidden; font-size: 14px; font-weight: 500; color: var(--gp-text-muted); }
+.v2-bg-tile .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.v2-bg-tile .info b { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.v2-bg-tile .v2-bg-del { position: absolute; top: 6px; right: 6px; background: rgba(18, 20, 32, .85); opacity: 0; }
+.v2-bg-tile:hover .v2-bg-del, .v2-bg-tile:focus-within .v2-bg-del { opacity: 1; }

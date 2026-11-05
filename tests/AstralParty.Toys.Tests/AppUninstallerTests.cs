@@ -76,6 +76,7 @@ public class AppUninstallerTests
         Assert.False(Directory.Exists(extract));
         Assert.False(File.Exists(Path.Combine(profile, "game-profiles.json")));
         Assert.False(Directory.Exists(history));
+        Assert.Contains(Path.Combine(profile, "backgrounds"), items.Directories);
         Assert.False(Directory.Exists(emptyProfile));
         // 文件夹里还有回放：回放和文件夹都必须还在
         Assert.Equal("replay", File.ReadAllText(Path.Combine(replay, "12345")));

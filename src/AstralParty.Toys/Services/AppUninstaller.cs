@@ -55,7 +55,7 @@ public static class AppUninstaller
     {
         var files = new[] { "game-profiles.json", "modloader-state.json", "speedhack-state.json", "replay-library.json" }
             .Select(name => Path.Combine(profileDirectory, name)).ToList();
-        var directories = new List<string> { Path.Combine(profileDirectory, "speedhack"), Path.Combine(profileDirectory, "tools") };
+        var directories = new List<string> { Path.Combine(profileDirectory, "speedhack"), Path.Combine(profileDirectory, "tools"), Path.Combine(profileDirectory, "backgrounds") };
         if (!keepLoaderHistory) directories.Add(Path.Combine(profileDirectory, "modloader-history"));
         return (files, directories);
     }

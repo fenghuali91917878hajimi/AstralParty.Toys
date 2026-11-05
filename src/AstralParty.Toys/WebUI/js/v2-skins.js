@@ -23,7 +23,7 @@
   const segBtns = (cur, list, attr) => list.map(([k, l]) => `<button class="${cur === k ? 'on' : ''}" ${attr}="${k}">${l}</button>`).join('');
 
   /* ---------- 外框 ---------- */
-  const TABS = [['cards', '卡牌'], ['characters', '角色'], ['audio', '音效'], ['resource', '资源包']];
+  const TABS = [['cards', '卡牌'], ['characters', '角色'], ['audio', '音效'], ['resource', '资源包'], ['background', '背景']];
   function frameHead(action = '') {
     return `<div class="v2-head"><h1>自定义</h1><span class="v2-top-spacer"></span>${action}</div>
       <div class="v2-toolbar"><div class="v2-seg">${segBtns(tab(), TABS, 'data-v2s-tab')}</div></div>`;
@@ -296,6 +296,7 @@
       t === 'cards' ? (K.cardScheme ? cardScheme() : cardsList())
       : t === 'audio' ? (K.audioScheme ? audioScheme() : audioList())
       : t === 'resource' ? resourceView()
+      : t === 'background' && window.V2Bg ? window.V2Bg.html()
       : window.V2Chars ? window.V2Chars.html()
       : frameHead()}</div>`;
     // 搜索框：重画后把焦点和光标放回去

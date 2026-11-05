@@ -119,6 +119,7 @@ public partial class HybridWindow : Window
             WorkshopService.EnsureCoverDirectory();
             WebView.CoreWebView2.SetVirtualHostNameToFolderMapping(
                 "workshop.astral.local", WorkshopService.CoverDirectory, CoreWebView2HostResourceAccessKind.DenyCors);
+            MapBackgroundHost();
             WebView.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
             WebView.CoreWebView2.Settings.IsStatusBarEnabled = false;
             WebView.CoreWebView2.WebMessageReceived += WebMessageReceived;
