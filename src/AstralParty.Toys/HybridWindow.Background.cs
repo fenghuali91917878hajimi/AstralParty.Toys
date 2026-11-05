@@ -49,7 +49,9 @@ public partial class HybridWindow
                 string file = root.GetProperty("file").GetString() ?? "";
                 if (!IsPlainFileName(file) || !BackgroundImageExtensions.Contains(Path.GetExtension(file).ToLowerInvariant()))
                     throw new InvalidOperationException("背景文件名不正确。");
-                File.Delete(Path.Combine(BackgroundDirectory, file));
+                string target = Path.Combine(BackgroundDirectory, file);
+                if (File.Exists(target)) File.SetAttributes(target, FileAttributes.Normal);   // 只读文件 File.Delete 删不掉
+                File.Delete(target);
                 PostBackgroundList();
                 return true;
             default:
@@ -87,15 +89,22 @@ public partial class HybridWindow
             if (extension == ".webm")
             {
                 string pending = Guid.NewGuid().ToString("N") + BackgroundNameSeparator + name + extension;
-                File.Copy(source, Path.Combine(BackgroundPendingDirectory, pending));
+                CopyBackgroundFile(source, Path.Combine(BackgroundPendingDirectory, pending));
                 Post(new { type = "backgroundFrameNeeded", payload = new { file = pending, name } });
             }
             else if (BackgroundImageExtensions.Contains(extension))
             {
-                File.Copy(source, UniqueBackgroundPath(name, extension));
+                CopyBackgroundFile(source, UniqueBackgroundPath(name, extension));
             }
         }
         PostBackgroundList();
+    }
+
+    // File.Copy 会带上只读属性：从只读位置（光盘、只读的网络盘）导入后，副本就删不掉了
+    private static void CopyBackgroundFile(string source, string target)
+    {
+        File.Copy(source, target);
+        File.SetAttributes(target, FileAttributes.Normal);
     }
 
     private void SaveBackgroundFrame(string file, string dataUrl)
@@ -116,15 +125,23 @@ public partial class HybridWindow
         finally
         {
             DeletePendingBackground(file);
+            PostBackgroundList();   // 就算这一张失败，已经存好的也要显示出来
         }
-        PostBackgroundList();
     }
 
     private static void DeletePendingBackground(string file)
     {
         if (!IsPlainFileName(file) || !file.EndsWith(".webm", StringComparison.OrdinalIgnoreCase)) return;
         string path = Path.Combine(BackgroundPendingDirectory, file);
-        if (File.Exists(path)) File.Delete(path);
+        // 临时文件删不掉不是用户的问题，下次启动会再清一次，不能因此报错
+        try
+        {
+            if (!File.Exists(path)) return;
+            File.SetAttributes(path, FileAttributes.Normal);
+            File.Delete(path);
+        }
+        catch (IOException) { }
+        catch (UnauthorizedAccessException) { }
     }
 
     private static bool IsPlainFileName(string file) =>
