@@ -164,11 +164,15 @@
       // 新建皮肤包走原版表单：先把原版绑定表单的字段填好，再调用它的 createPackageFromBinding
       U().closeModal();
       csm.bindingSchemeId = C.scheme; csm.editing = null;
+      // 人物下拉框的选项原本由原版 openBinding 填，新界面不走那里，要先填好，否则赋值无效、人物变成 0
+      $('characterBindingHero').innerHTML = heroes().map(h => `<option value="${h.id}">${esc(h.name)}</option>`).join('');
       $('characterBindingHero').value = String(W.heroId); csm.bindingOptions();
       $('characterBindingTarget').value = String(W.target);
       $('characterBindingOfficial').value = String(W.official || 0);
       $('characterBindingPackage').value = '';
       csm.createPackageFromBinding();
+      // createPackageFromBinding 里的 form.reset() 会清空缓存路径；留空时导出找不到游戏后来下载的皮肤资源
+      if (!$('characterTemplateCache').value) $('characterTemplateCache').value = data()?.templateCache || '';
       C.wiz = null; return;
     }
     const rule = { Id: W.ruleId || 'rule-' + crypto.randomUUID(), HeroId: W.heroId, TargetSkinItemId: W.target,
