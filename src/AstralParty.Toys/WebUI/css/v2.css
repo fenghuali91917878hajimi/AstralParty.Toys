@@ -663,3 +663,10 @@ html body.v2-has-bg :is(.v2-card, .v2-scheme, .v2-tcard, .v2-slot, .v2-seg, .v2-
 :root[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: rgba(31, 34, 51, .45); }
 :root[data-theme="light"] .v2-scheme .thumb .v2-badge { background: rgba(255, 255, 255, .92); }
 :root[data-theme="light"] .v2-bg-tile .v2-bg-del { background: rgba(255, 255, 255, .92); }
+
+/* 切换深浅色：整页淡入淡出 0.5 秒（冷却时间在 v2-shell.js） */
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: .5s; }
+.v2-theme-btn.cooling { opacity: .6; cursor: default; }
+/* 原版脚本里写在元素上的白字和白色半透明底 */
+:root[data-theme="light"] [style*="color:#ffffff"], :root[data-theme="light"] [style*="color:#fff;"] { color: var(--v2-text) !important; }
+:root[data-theme="light"] [style*="background:rgba(255,255,255"] { background: rgba(31, 34, 51, .06) !important; }

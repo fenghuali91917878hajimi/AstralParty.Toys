@@ -246,12 +246,29 @@
     btn.title = `切换到${to}模式`;
     btn.setAttribute('aria-label', btn.title);
   }
-  function toggleTheme() {
-    const light = !isLight();
+  function syncHostTheme() {
+    post({ type: 'uiThemeChanged', light: isLight() });   // 宿主下次启动时，加载画面才能用对颜色
+  }
+  const THEME_COOLDOWN_MS = 500;   // 动画（0.5 秒，时长在 v2.css）放完后再等这么久才能再切
+  let themeBusy = false;
+  function applyTheme(light) {
     if (light) document.documentElement.dataset.theme = 'light';
     else delete document.documentElement.dataset.theme;
     try { localStorage.setItem(THEME_KEY, light ? 'light' : 'dark'); } catch { /* 存不了只影响下次启动 */ }
     drawThemeButton();
+    syncHostTheme();   // 动画的回调是异步的，要在真正切换之后才发
+  }
+  function toggleTheme() {
+    if (themeBusy) return;
+    themeBusy = true;
+    $('v2ThemeBtn')?.classList.add('cooling');
+    const light = !isLight();
+    // 用整页淡入淡出，不用给每个元素加过渡；关了「界面动画」或内核不支持时直接切
+    const animate = document.startViewTransition && !document.body.classList.contains('reduce-motion');
+    const finished = animate ? document.startViewTransition(() => applyTheme(light)).finished : (applyTheme(light), Promise.resolve());
+    finished.catch(() => {}).finally(() => {
+      setTimeout(() => { themeBusy = false; $('v2ThemeBtn')?.classList.remove('cooling'); }, THEME_COOLDOWN_MS);
+    });
   }
   function mountThemeButton() {
     const nav = document.querySelector('.nav-breadcrumbs');
@@ -261,6 +278,7 @@
     btn.addEventListener('click', toggleTheme);
     nav.append(btn);
     drawThemeButton();
+    syncHostTheme();
   }
 
   function mountTopbar() {

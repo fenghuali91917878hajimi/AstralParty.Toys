@@ -19,9 +19,9 @@
         <Border x:Name="StartupOverlay" Background="#121420">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <TextBlock Text="✦" Foreground="#FF1776" FontSize="54" HorizontalAlignment="Center" />
-                <TextBlock Text="加载中..." HorizontalAlignment="Center" Foreground="#F3F5FA" FontSize="18" Margin="0,18,0,0" />
+                <TextBlock x:Name="StartupTitle" Text="加载中..." HorizontalAlignment="Center" Foreground="#F3F5FA" FontSize="18" Margin="0,18,0,0" />
                 <TextBlock x:Name="StartupDetail" Text="AstralParty Toys" HorizontalAlignment="Center" Foreground="#94A3B8" Margin="0,8,0,0" />
-                <ProgressBar IsIndeterminate="True" Width="280" Height="4" Margin="0,24,0,0" Foreground="#FF1776" Background="#20243A" BorderThickness="0" />
+                <ProgressBar x:Name="StartupProgress" IsIndeterminate="True" Width="280" Height="4" Margin="0,24,0,0" Foreground="#FF1776" Background="#20243A" BorderThickness="0" />
                 <Button x:Name="ClassicButton" Content="使用备用界面" Visibility="Collapsed" Margin="0,24,0,0"
                         Padding="18,9" Click="ClassicButton_Click" />
             </StackPanel>

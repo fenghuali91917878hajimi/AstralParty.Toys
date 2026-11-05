@@ -62,6 +62,7 @@ public partial class HybridWindow : Window
 
     private async void Window_Loaded(object sender, RoutedEventArgs e)
     {
+        ApplyStartupTheme();
         await InitializeWebViewAsync();
     }
 

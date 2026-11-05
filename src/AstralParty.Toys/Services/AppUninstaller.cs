@@ -53,7 +53,7 @@ public static class AppUninstaller
     /// </summary>
     public static (IReadOnlyList<string> Files, IReadOnlyList<string> Directories) SettingsItems(string profileDirectory, bool keepLoaderHistory)
     {
-        var files = new[] { "game-profiles.json", "modloader-state.json", "speedhack-state.json", "replay-library.json" }
+        var files = new[] { "game-profiles.json", "modloader-state.json", "speedhack-state.json", "replay-library.json", "ui-theme.txt" }
             .Select(name => Path.Combine(profileDirectory, name)).ToList();
         var directories = new List<string> { Path.Combine(profileDirectory, "speedhack"), Path.Combine(profileDirectory, "tools"), Path.Combine(profileDirectory, "backgrounds") };
         if (!keepLoaderHistory) directories.Add(Path.Combine(profileDirectory, "modloader-history"));
