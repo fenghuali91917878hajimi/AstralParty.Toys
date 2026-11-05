@@ -605,7 +605,8 @@ html body .profiles-page .profiles-note { margin-top: 14px; color: var(--gp-text
 
 /* ---------- 自定义背景：图层在最底下，界面表面按「界面不透明度」变透明；弹窗和菜单保持不透明 ---------- */
 :root { --v2-ui: .8; --v2-bg-blur: 12px; }
-#v2BgLayer { display: none; position: fixed; inset: -48px; z-index: 0; background: center / cover no-repeat; filter: blur(var(--v2-bg-blur)); }
+/* 模糊会让边缘变透明，所以四周多出一圈，大小跟着模糊度走：模糊越小，图片裁得越少 */
+#v2BgLayer { display: none; position: fixed; inset: calc(var(--v2-bg-blur) * -2); z-index: 0; background: center / cover no-repeat; filter: blur(var(--v2-bg-blur)); }
 #v2BgLayer::after { content: ""; position: absolute; inset: 0; background: rgba(var(--v2-chrome-rgb), calc(var(--v2-ui) * .55)); }
 body.v2-has-bg #v2BgLayer { display: block; }
 body.v2-has-bg { --v2-panel: rgba(var(--v2-panel-rgb), var(--v2-ui)); --v2-panel-2: rgba(var(--v2-panel-2-rgb), var(--v2-ui)); --gp-bg-card: rgba(var(--v2-panel-rgb), var(--v2-ui)); --gp-bg-panel: rgba(var(--v2-panel-rgb), var(--v2-ui)); }
