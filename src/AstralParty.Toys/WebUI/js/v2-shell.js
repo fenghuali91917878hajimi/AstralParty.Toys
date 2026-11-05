@@ -165,6 +165,72 @@
     jumpSt[key] = { mode: 'done', timer: setTimeout(() => jumpReset(key), 1500) };
   }
 
+  /* ---------- 检查更新 ----------
+     启动时最多每天查一次修改版的发布列表，查不到不打扰；有新版本才在顶栏出现按钮，跳到发布页，不自动安装。
+     不能用 GitHub 的 releases/latest：它不算预发布版，只有预发布版时返回 404。 */
+  const RELEASES_API = 'https://api.github.com/repos/fenghuali91917878hajimi/AstralParty.Toys/releases?per_page=20';
+  const RELEASES_PREFIX = 'https://github.com/fenghuali91917878hajimi/AstralParty.Toys/releases/';
+  const UPDATE_KEY = 'v2UpdateCheck', UPDATE_EVERY = 24 * 3600 * 1000;
+  const Update = { status: 'idle', available: false, latest: null, checkedAt: 0 };   // status: idle / checking / latest / available / failed
+
+  // 1.4.0-mod.2 → [1, 4, 0, 2]；不是这种格式的标签不当作版本
+  function parseVersion(text) {
+    const m = /^v?(\d+)\.(\d+)\.(\d+)(?:-mod\.(\d+))?(?:\+.*)?$/.exec(String(text || '').trim());
+    return m ? [+m[1], +m[2], +m[3], +(m[4] || 0)] : null;
+  }
+  function isNewer(a, b) {
+    for (let i = 0; i < 4; i++) if (a[i] !== b[i]) return a[i] > b[i];
+    return false;
+  }
+  function pickNewest(releases) {
+    let best = null;
+    for (const r of Array.isArray(releases) ? releases : []) {
+      const v = parseVersion(r?.tag_name);
+      if (!v || r.draft || !String(r.html_url).startsWith(RELEASES_PREFIX)) continue;
+      if (!best || isNewer(v, best.v)) best = { v, tag: r.tag_name, url: r.html_url };
+    }
+    return best && { tag: best.tag, url: best.url };
+  }
+  function applyUpdate(latest, checkedAt) {
+    const cur = parseVersion(window.VersionModule?.info?.version), v = parseVersion(latest?.tag);
+    const available = !!(cur && v && isNewer(v, cur));
+    Object.assign(Update, { status: available ? 'available' : 'latest', available, latest: latest || null, checkedAt });
+    drawUpdate();
+  }
+  function drawUpdate() {
+    const box = $('v2UpdateJump');
+    if (box) {
+      const on = Update.available;   // 正在查或这次查失败时，上次查到的新版本仍然有效
+      box.hidden = !on;
+      if (on) {
+        JUMPS.update = { name: '新版本发布页', url: Update.latest.url };
+        box.querySelector('button').innerHTML = `${ICON.download}有新版本 ${esc(Update.latest.tag)}`;
+      }
+    }
+    document.dispatchEvent(new Event('v2update'));
+  }
+  async function checkUpdate() {
+    if (Update.status === 'checking') return;
+    Update.status = 'checking'; drawUpdate();
+    try {
+      const res = await fetch(RELEASES_API, { headers: { Accept: 'application/vnd.github+json' }, cache: 'no-store', signal: AbortSignal.timeout(10000) });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const latest = pickNewest(await res.json()), now = Date.now();
+      try { localStorage.setItem(UPDATE_KEY, JSON.stringify({ at: now, latest })); } catch { /* 存不了下次再查 */ }
+      applyUpdate(latest, now);
+    } catch {
+      Update.status = 'failed'; drawUpdate();
+    }
+  }
+  // 启动时：一天内查过就用上次的结果，否则查一次。版本号要等宿主发来才知道，所以挂在版本消息后面
+  function autoCheckUpdate() {
+    if (autoCheckUpdate.done) return; autoCheckUpdate.done = true;
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem(UPDATE_KEY) || 'null'); } catch { /* 当作没查过 */ }
+    if (saved && Date.now() - saved.at < UPDATE_EVERY) applyUpdate(saved.latest, saved.at);
+    else checkUpdate().then(() => { if (Update.status === 'failed') { Update.status = 'idle'; drawUpdate(); } });
+  }
+
   function mountTopbar() {
     const header = document.querySelector('.global-header');
     const chip = $('appVersionChip');
@@ -173,6 +239,7 @@
     box.id = 'v2TopLinks';
     box.style.cssText = 'display:flex;align-items:center;gap:4px';
     box.innerHTML = `
+      <div class="v2-jump" id="v2UpdateJump" hidden><button class="v2-tb-btn v2-update-btn" data-v2jump="update"></button><div class="v2-jump-tip" role="status" aria-live="polite"></div></div>
       <div class="v2-jump"><button class="v2-tb-btn" data-v2jump="wiki">${ICON.book}攻略</button><div class="v2-jump-tip" role="status" aria-live="polite"></div></div>
       <div class="v2-jump"><button class="v2-tb-btn" data-v2jump="github">${ICON.ext}GitHub</button><div class="v2-jump-tip" role="status" aria-live="polite"></div></div>
       <div class="v2-tb-sep"></div>`;
@@ -517,7 +584,7 @@
     box.oncompositionend = () => { composingBox = null; run(); };
   }
 
-  window.V2UI = { ICON, openMenu, closeMenu, openModal, closeModal, modalActions, armDanger, confirmDelete, bindSearch, isComposing,
+  window.V2UI = { Update, checkUpdate, ICON, openMenu, closeMenu, openModal, closeModal, modalActions, armDanger, confirmDelete, bindSearch, isComposing,
     setModalCancel: fn => { modalCancel = fn; } };
 
   /* ---------- 接线 ---------- */
@@ -530,6 +597,14 @@
   document.addEventListener('DOMContentLoaded', () => {
     mountTopbar();
     renderHome();
+
+    // 收到版本号后才能比较新旧（包一层原版方法，不改它的行为）
+    const vm = window.VersionModule;
+    if (vm?.render) {
+      const render = vm.render;
+      vm.render = function (...args) { const r = render.apply(this, args); if (this.info?.version) autoCheckUpdate(); return r; };
+      if (vm.info?.version) autoCheckUpdate();
+    }
 
     // 游戏多开的删除确认换成统一的弹窗；真正删除的消息和原版一样
     if (window.AccountProfilesModule) AccountProfilesModule.confirmDelete = profile => confirmDelete({

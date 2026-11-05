@@ -116,6 +116,9 @@ body.v2-maximized .v2-win .restore { display: block; }
 
 /* 外部跳转：点一次待确认，再点才打开；两次点击至少隔 0.5 秒 */
 .v2-jump { position: relative; }
+.v2-jump[hidden] { display: none; }
+.v2-tb-btn.v2-update-btn { color: var(--gp-pink); background: var(--v2-pink-soft); }
+.v2-tb-btn.v2-update-btn:hover { color: var(--gp-pink); background: var(--v2-pink-soft); }
 .v2-jump .v2-tb-btn.armed { color: var(--gp-pink); background: var(--v2-pink-soft); box-shadow: inset 0 0 0 1px rgba(255, 23, 118, .5); }
 .v2-jump .v2-tb-btn.gap { opacity: .6; cursor: default; }
 .v2-jump-tip { position: absolute; top: calc(100% + 8px); left: 50%; transform: translate(-50%, -4px); opacity: 0; pointer-events: none;

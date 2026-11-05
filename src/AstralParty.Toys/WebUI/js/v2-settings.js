@@ -23,6 +23,16 @@
   const SOURCE_URL = 'https://github.com/fenghuali91917878hajimi/AstralParty.Toys/tree/redesign';
   const ISSUES_URL = 'https://github.com/fenghuali91917878hajimi/AstralParty.Toys/issues';
   const UPSTREAM_URL ='https://github.com/higashitaniyume/AstralParty.Toys';
+  function updateText() {
+    const u = window.V2UI?.Update;
+    switch (u?.status) {
+      case 'checking': return '正在检查…';
+      case 'available': return `有新版本 <b>${esc(u.latest.tag)}</b>，点右上角的按钮去下载`;
+      case 'latest': return '已经是最新版本';
+      case 'failed': return '这次没查到：可能是网络不通，或者查询太频繁被 GitHub 限制了，稍后再试';
+      default: return '还没有检查过';
+    }
+  }
   const MIRRORS = [['direct', '直连 GitHub'], ['gh-proxy', 'GH-Proxy 镜像'], ['ghfast', 'GHFast 镜像'], ['custom', '自定义镜像']];
 
   // 回放库设置：宿主收到缺字段会当成「默认 / 关闭」，所以每次都把四个字段一起送
@@ -116,7 +126,8 @@
         <div class="v2-row"><span class="k">内置加载器</span><span class="v v2-muted">${esc(info?.embeddedLoaderVersion ? 'CesiumLoader v' + String(info.embeddedLoaderVersion).replace(/^v/i, '') : '没有内嵌发布包')}</span></div>
         <div class="v2-row"><span class="k">说明</span><span class="v" style="white-space:normal">这是<b>修改版</b>（界面重做），基于原作者 higashitaniyume 的 AstralParty.Toys 修改，不是原作者发布的版本。
           <br><span class="v2-muted">原项目使用 AGPL-3.0 许可证；遇到问题请先在这个修改版里排查，不要直接找原作者。</span></span></div>
-        <div class="v2-row"><span class="k">软件更新</span><span class="v v2-muted" style="white-space:normal">修改版不会自动更新：作者的更新包是原版界面，装上会盖掉新界面。作者出新版后，要把改动合并进来再重新打包。</span></div>
+        <div class="v2-row"><span class="k">软件更新</span><span class="v" style="white-space:normal">${updateText()}<br><span class="v2-muted">启动时每天最多访问一次 GitHub，查询修改版的发布列表。有新版本时右上角会提示，到发布页下载，不会自动安装。</span></span>
+          <button class="v2-btn ghost" data-v2g="checkUpdate" ${window.V2UI?.Update?.status === 'checking' ? 'disabled' : ''}>检查更新</button></div>
         <div class="v2-row"><span class="k">修改版源码</span><span class="v" style="white-space:normal;font-family:var(--v2-mono);font-size:13px">${esc(SOURCE_URL)}</span>
           <button class="v2-btn ghost" data-v2g="copyUrl" data-url="${esc(SOURCE_URL)}">${I().copy}复制</button></div>
         <div class="v2-row"><span class="k">问题反馈</span><span class="v" style="white-space:normal;font-family:var(--v2-mono);font-size:13px">${esc(ISSUES_URL)}</span>
@@ -225,6 +236,7 @@
     libBrowse: () => post({ type: 'libraryBrowseRoot' }),
     libOpen: () => post({ type: 'libraryOpenFolder' }),
     maintainNow: () => post({ type: 'libraryMaintain' }),
+    checkUpdate: () => window.V2UI?.checkUpdate(),
     versionDetail: () => window.VersionModule?.showDetails(),
     changelog: () => window.VersionModule?.requestChangelog('app'),
     uninstall: () => post({ type: 'appUninstallInfo' }),
@@ -272,6 +284,7 @@
 
   // 原版这些数据回来时重画
   document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('v2update', () => { if (!U().isComposing?.()) render(); });
     const gl = GL();
     if (gl) {
       ['renderProfiles'].forEach(n => { const o = gl[n]; if (typeof o === 'function') gl[n] = function (...a) { const r = o.apply(this, a); render(); return r; }; });
