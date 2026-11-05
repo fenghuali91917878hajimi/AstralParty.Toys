@@ -448,4 +448,6 @@
 :where(:root[data-theme="light"]) .op-spinner { border: 2px solid rgba(31, 34, 51, 0.22); }
 
 /* ---------- css/profiles.css ---------- */
+:where(:root[data-theme="light"]) .profiles-page::-webkit-scrollbar-thumb { background: rgba(31, 34, 51, 0.16); }
+:where(:root[data-theme="light"]) .profiles-page::-webkit-scrollbar-thumb:hover { background: rgba(31, 34, 51, 0.28); }
 :where(:root[data-theme="light"]) .profiles-input:focus { box-shadow: 0 0 0 2px rgba(31, 34, 51, 0.06); }

@@ -377,10 +377,8 @@
     },
     animPlay: () => { if (C.timer) stopAnim(); else playTick(); VS().render(); },
     animMenu: el => {
-      const a = (field(field(pkgOf(C.pkg), 'manifest'), 'animations') || {})[C.action];
       U().openMenu(el, [
         { label: `替换第 ${C.frame + 1} 帧…`, icon: I().upload, fn: () => sendPkg('characterSkinsFrame', { action: C.action, index: C.frame }) },
-        { label: '导出这个动作为 GIF', icon: I().download, fn: () => sendPkg('characterSkinsGif', { action: C.action, fps: Number(field(a, 'fps')) || 15, loop: field(a, 'loop') !== false }) },
         '-',
         { label: '恢复原版动作…', icon: I().refresh, fn: () => U().confirmDelete({ title: `恢复「${esc(C.action)}」原版动作？`, ok: '恢复',
           lines: ['会移除这个动作的自制帧和原精灵映射', '重启游戏后恢复原动作'], onOk: () => { stopAnim(); sendPkg('characterSkinsClearAction', { action: C.action }); } }) },

@@ -10,10 +10,10 @@
     <AssemblyName>AstralParty.Toys</AssemblyName>
     <RootNamespace>AstralParty.Toys</RootNamespace>
     <StartupObject>AstralParty.Toys.App</StartupObject>
-    <!-- 基线 v1.4.0，修改版序号 mod.1；数字版本只能是纯数字。 -->
-    <Version>1.4.0-mod.1</Version>
-    <AssemblyVersion>1.4.0.0</AssemblyVersion>
-    <FileVersion>1.4.0.0</FileVersion>
+    <!-- 基线 v1.4.1，修改版序号 mod.1；数字版本只能是纯数字。 -->
+    <Version>1.4.1-mod.1</Version>
+    <AssemblyVersion>1.4.1.0</AssemblyVersion>
+    <FileVersion>1.4.1.0</FileVersion>
     <ApplicationIcon>WebUI\images\UT_AccountHeadShot_70902.ico</ApplicationIcon>
   </PropertyGroup>
 
@@ -25,7 +25,6 @@
     <PackageReference Include="AssetsTools.NET" Version="3.0.5" />
     <PackageReference Include="AssetsTools.NET.Addressables" Version="3.0.2" />
     <PackageReference Include="AssetsTools.NET.Texture" Version="3.0.2" />
-    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="15.0.0" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4191.47" />
   </ItemGroup>
 

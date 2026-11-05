@@ -326,7 +326,15 @@
   /* ---------- 概览 ---------- */
   const profiles = () => AppState.gameProfiles?.profiles || [];
   const activeGame = () => profiles().find(p => p.active);
-  const isBypass = () => !!$('launchBypassSteam')?.checked;
+  // 启动方式沿用原版的单选框（v1.4.1 起有四种），名称和提示与原版的说明一致
+  const LAUNCH_MODES = [
+    ['steam', '从 Steam 启动', '已切到从 Steam 启动'],
+    ['bypassSteam', '绕过 Steam 启动', '已切到绕过 Steam：不能用 Steam 大厅与邀请'],
+    ['taptap', '从 TapTap 启动', '已切到从 TapTap 启动：要装好 TapTap PC 版'],
+    ['bypassTapTap', '绕过 TapTap 启动', '已切到绕过 TapTap：直接启动游戏主程序'],
+  ];
+  const launchMode = () => window.HomeModule?.getLaunchMode?.() || 'steam';
+  const launchLabel = () => (LAUNCH_MODES.find(m => m[0] === launchMode()) || LAUNCH_MODES[0])[1];
   const launchBusy = () => $('btnMenuLaunchGame')?.dataset.busy === '1';
   const modeLocked = () => !!$('launchViaSteam')?.disabled;
   const gameRunning = () => !!(V2.modStatus?.gameRunning ?? AppState.replayLibrary?.gameRunning);
@@ -516,7 +524,7 @@
           <button class="v2-icon-btn" data-v2="copyPath" title="复制路径">${ICON.copy}</button>
           <button class="v2-btn ghost" data-v2="gameMenu" data-v2menu>${ICON.folder}${esc(g.label || g.editionLabel || '切换')}${ICON.down}</button></div>
         <div class="v2-row"><span class="k">启动方式</span>
-          <span class="v">${isBypass() ? '绕过 Steam 启动' : '从 Steam 启动'}${locked ? '　<span class="v2-muted">游戏启动中，稍后可切换</span>' : ''}</span></div>
+          <span class="v">${launchLabel()}${locked ? '　<span class="v2-muted">游戏启动中，稍后可切换</span>' : ''}</span></div>
       </div>
 
       <div class="v2-card">
@@ -539,14 +547,14 @@
     </div>`;
   }
 
-  // 用原版的单选框切换启动方式：触发它自己的 change 处理（记住选择 + setSteamBypass）
-  function setLaunchMode(bypass) {
-    const radio = $(bypass ? 'launchBypassSteam' : 'launchViaSteam');
+  // 用原版的单选框切换启动方式：触发它自己的 change 处理（记住选择 + 通知宿主）
+  function setLaunchMode(mode) {
+    const radio = document.querySelector(`input[name="launchMode"][value="${mode}"]`);
     if (!radio || radio.disabled || radio.checked) return;
     radio.checked = true;
     radio.dispatchEvent(new Event('change'));
     renderHome();
-    toast(bypass ? '已切到绕过 Steam：不能用 Steam 大厅与邀请' : '已切到从 Steam 启动');
+    toast(LAUNCH_MODES.find(m => m[0] === mode)[2]);
   }
 
   const actions = {
@@ -557,10 +565,9 @@
       setTimeout(renderHome, 5100); setTimeout(renderHome, 6100);
     },
     launchMenu: el => {
-      const locked = modeLocked(), bypass = isBypass();
+      const locked = modeLocked(), cur = launchMode();
       openMenu(el, [
-        { label: '从 Steam 启动', icon: bypass ? ICON.dot : ICON.check, disabled: locked, fn: () => setLaunchMode(false) },
-        { label: '绕过 Steam 启动', icon: bypass ? ICON.check : ICON.dot, disabled: locked, fn: () => setLaunchMode(true) },
+        ...LAUNCH_MODES.map(([mode, label]) => ({ label, icon: cur === mode ? ICON.check : ICON.dot, disabled: locked, fn: () => setLaunchMode(mode) })),
         ...(locked ? ['-', { label: '游戏启动中，稍后再切换', disabled: true }] : []),
       ]);
     },
@@ -718,7 +725,7 @@
           V2.lastModStatusAsk = Date.now(); post({ type: 'modStatus' });
         }
         break;
-      case 'replayLibrary': case 'homeData': case 'steamBypassSync': break;
+      case 'replayLibrary': case 'homeData': case 'steamBypassSync': case 'launchModeSync': break;
       default: return;
     }
     if (AppState.currentPage === 'home') setTimeout(renderHome);   // 等原版处理完（比如头像、单选框）再画

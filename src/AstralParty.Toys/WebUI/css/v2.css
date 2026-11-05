@@ -671,3 +671,8 @@ html body.v2-has-bg :is(.v2-card, .v2-scheme, .v2-tcard, .v2-slot, .v2-seg, .v2-
 /* 原版脚本里写在元素上的白字和白色半透明底 */
 :root[data-theme="light"] [style*="color:#ffffff"], :root[data-theme="light"] [style*="color:#fff;"] { color: var(--v2-text) !important; }
 :root[data-theme="light"] [style*="background:rgba(255,255,255"] { background: rgba(31, 34, 51, .06) !important; }
+
+/* 作者 v1.4.1 把多开页的滚动条改窄了：其他页面都按标准宽度留位置，这里要一致，否则内容会错位 */
+html body .profiles-page { scrollbar-width: auto; scrollbar-color: auto; }
+html body .profiles-page::-webkit-scrollbar { width: 15px; }
+html body .profiles-page::-webkit-scrollbar-thumb { background-clip: padding-box; border: 4px solid transparent; }
