@@ -531,6 +531,13 @@
     mountTopbar();
     renderHome();
 
+    // 游戏多开的删除确认换成统一的弹窗；真正删除的消息和原版一样
+    if (window.AccountProfilesModule) AccountProfilesModule.confirmDelete = profile => confirmDelete({
+      title: `删除账号档案「${esc(profile.name)}」？`,
+      lines: ['这个档案的账号缓存、存档和回放会移进<b>回收站</b>，可以从回收站找回', '默认目录（游戏自己的目录）不受影响'],
+      onOk: () => post({ type: 'accountProfileDelete', name: profile.name }),
+    });
+
     document.addEventListener('click', e => {
       const a = e.target.closest('[data-v2]'), p = e.target.closest('[data-v2page]');
       if (a && !a.disabled) actions[a.dataset.v2]?.(a);

@@ -78,6 +78,7 @@ body.page-home-active .page-container { height: auto; }
 .nav-crumb-btn[data-page="mods"] { order: 3; }
 .nav-crumb-btn[data-page="workshop"] { order: 4; }
 .nav-crumb-btn[data-page="skins"] { order: 5; }
+.nav-crumb-btn[data-page="profiles"] { order: 6; }
 .nav-crumb-btn[data-page="settings"] { order: 99; margin-top: auto; }
 .nav-crumb-btn[data-page="wiki"] { display: none; }
 
@@ -527,3 +528,53 @@ html body .workshop-page .workshop-detail-cover { border: 1px solid var(--v2-bor
 
 /* ---------- 提示（原版是胶囊形 + 金色粗边，文字一长就撑出圆角） ---------- */
 html body .toast-container { width: max-content; max-width: min(480px, calc(100vw - 48px)); padding: 10px 14px; border: 1px solid var(--v2-border-strong); border-radius: 10px; background: var(--v2-panel); box-shadow: 0 8px 24px rgba(0, 0, 0, .45); font-size: 13px; font-weight: 500; line-height: 1.6; word-break: normal; overflow-wrap: anywhere; }
+
+/* ---------- 游戏多开（1.4.0）：内容和逻辑是原版 profiles.js 画的，这里只统一外观 ----------
+   粉色只留给「当前」那一张卡的启动按钮；每张卡的按钮放到信息下面，880 宽放不下左右排。 */
+#profilesView { display: block; overflow-y: auto; }
+#profilesView.hidden { display: none !important; }
+html body .profiles-page { --v2-pf-gutter: max(28px, calc((100% - 824px) / 2)); max-width: none; margin: 0; padding: 24px var(--v2-pf-gutter) 40px; background: var(--gp-bg); color: #f3f5fa; font-size: 14px; line-height: 1.5; }
+html body .profiles-page .profiles-header { margin-bottom: 14px; }
+html body .profiles-page .profiles-header h2 { font-size: 22px; font-weight: 700; margin: 0 0 4px; }
+html body .profiles-page .profiles-header p { margin: 0; color: var(--gp-text-muted); font-size: 13px; }
+html body .profiles-page .profiles-status { margin-bottom: 12px; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; color: var(--gp-text-muted); font-size: 13px; }
+html body .profiles-page .profiles-status strong { color: #fff; font-weight: 600; }
+html body .profiles-page .profiles-option { margin-bottom: 14px; padding: 12px 16px; border: 1px solid var(--v2-border); border-radius: 10px; background: var(--v2-panel); box-shadow: none; }
+html body .profiles-page .profiles-option:hover { border-color: var(--v2-border-strong); background: var(--v2-panel); }
+html body .profiles-page .profiles-option input[type='checkbox'] { accent-color: var(--gp-pink); }
+html body .profiles-page .profiles-option-title { font-weight: 500; }
+html body .profiles-page .profiles-option-hint { color: var(--gp-text-muted); font-size: 12px; }
+
+html body .profiles-page .profiles-create { gap: 8px; margin-bottom: 6px; }
+html body .profiles-page .profiles-input { height: 34px; padding: 0 10px; border: 1px solid var(--v2-border-strong); border-radius: 8px; background: var(--gp-bg); box-shadow: none; color: #fff; font-size: 14px; }
+html body .profiles-page .profiles-input:focus { border-color: var(--gp-pink); box-shadow: none; }
+html body .profiles-page .profiles-name-hint { margin-bottom: 14px; color: var(--gp-text-muted); font-size: 12px; }
+html body .profiles-page .profiles-name-hint.is-error { color: #f43f5e; }
+
+/* 按钮：和 .v2-btn 一样的尺寸和圆角 */
+html body .profiles-page :is(.secondary-btn, .primary-btn, .danger-btn) { height: 34px; min-height: 34px; padding: 0 14px; border: 1px solid var(--v2-border-strong); border-radius: 8px; background: none; box-shadow: none; color: var(--gp-text-sub); font-size: 14px; font-weight: 500; text-shadow: none; transform: none; animation: none; }
+html body .profiles-page :is(.secondary-btn, .primary-btn):hover:not(:disabled) { background: var(--v2-hover); color: #fff; transform: none; box-shadow: none; }
+html body .profiles-page :is(.secondary-btn, .primary-btn, .danger-btn):disabled { opacity: .5; cursor: default; }
+html body .profiles-page .danger-btn { border-color: transparent; color: #f43f5e; }
+html body .profiles-page .danger-btn:hover:not(:disabled) { background: rgba(244, 63, 94, .1); transform: none; box-shadow: none; }
+html body .profiles-page .profiles-card.is-active .primary-btn { border-color: transparent; background: var(--gp-pink); color: #fff; }
+html body .profiles-page .profiles-card.is-active .primary-btn:hover:not(:disabled) { background: var(--gp-pink-hover); }
+html body .profiles-page :is(.secondary-btn, .primary-btn, .danger-btn) svg { width: 16px; height: 16px; }
+
+html body .profiles-page .profiles-list { gap: 10px; }
+html body .profiles-page .profiles-empty { border: 1px solid var(--v2-border); border-radius: 10px; background: var(--v2-panel); color: var(--gp-text-muted); }
+html body .profiles-page .profiles-card { flex-direction: column; align-items: stretch; gap: 10px; padding: 14px 16px; border: 1px solid var(--v2-border); border-radius: 10px; background: var(--v2-panel); box-shadow: none; }
+html body .profiles-page .profiles-card:hover { border-color: var(--v2-border-strong); background: var(--v2-panel); transform: none; box-shadow: none; }
+html body .profiles-page .profiles-card.is-active { border-color: var(--gp-border-pink); box-shadow: none; }
+html body .profiles-page .profiles-card.is-missing { border-style: dashed; }
+html body .profiles-page .profiles-name { font-size: 15px; font-weight: 600; }
+html body .profiles-page .profiles-tag { padding: 1px 8px; border: 0; border-radius: 999px; font-size: 12px; font-weight: 500; }
+html body .profiles-page .profiles-tag.active { background: var(--v2-pink-soft); color: var(--gp-pink); }
+html body .profiles-page .profiles-tag.warn { background: rgba(250, 204, 21, .1); color: var(--gp-gold); }
+html body .profiles-page .profiles-path { font-family: var(--v2-mono); font-size: 12px; color: var(--gp-text-muted); }
+html body .profiles-page .profiles-row-sub { color: var(--gp-text-muted); font-size: 13px; }
+html body .profiles-page .profiles-note-line { color: var(--gp-text-muted); font-size: 13px; }
+html body .profiles-page .profiles-card-actions { justify-content: flex-start; align-items: center; }
+html body .profiles-page .profiles-card-actions .danger-btn { margin-left: auto; }
+html body .profiles-page .profiles-mode-select { height: 34px; padding: 0 8px; border: 1px solid var(--v2-border-strong); border-radius: 8px; background: var(--gp-bg); box-shadow: none; color: var(--gp-text-sub); font-size: 13px; }
+html body .profiles-page .profiles-note { margin-top: 14px; color: var(--gp-text-muted); font-size: 12px; }

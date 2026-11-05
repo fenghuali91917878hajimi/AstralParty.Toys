@@ -19,6 +19,10 @@ public sealed class LoaderConfig
     public double SpeedhackBaseSpeed { get; set; } = 1.0;
     /// <summary>变速控制文件通道(mod 热键变速用)。默认开; 关掉后 SpeedHackMod 的热键失效(基础倍率仍生效)。</summary>
     public bool SpeedControlEnabled { get; set; } = true;
+    /// <summary>窗口置前文件通道(回合置前类 mod 用)。默认开; 关掉后只影响这类 mod。</summary>
+    public bool WindowControlEnabled { get; set; } = true;
+    /// <summary>原生音频控制通道(UDP + 加载器 audio 目录, 自定义音效/BGM 用)。默认开。</summary>
+    public bool AudioControlEnabled { get; set; } = true;
 
     // ---- Steam 绕过(加载器原生功能, 非 mod; 见加载器 docs\steam-bypass.md) ----
     // 这些是**加载器**(version.dll) 的功能开关: 国服客户端在非 Steam 启动时, AOT 类
@@ -48,5 +52,17 @@ public sealed class LoaderConfig
     /// 主解法(方案C)已把 Task 结果构造成真正的空 Nullable, 这块代码根本不会被调用, 所以**不需要**它。</para></summary>
     public bool SteamBypassLobbyMethods { get; set; }
 
+    /// <summary>加载器自身版本(SemVer)。与发布 tag (modloader-&lt;版本&gt;) 对应, 启动横幅会打印。</summary>
     public string SdkVersion { get; set; } = "2.0.0";
+
+    /// <summary>多 profile: 把游戏的账号 / 存档 / 回放目录重定向到
+    /// <c>%USERPROFILE%\AppData\LocalLow\&lt;公司&gt;\&lt;产品&gt;_profiles\&lt;名&gt;</c>(加载器原生功能)。
+    /// 空串 = 不重定向(游戏写自己的目录); 绝对路径 = 直接把 profile 放到指定目录。
+    /// 见加载器 <c>docs\多开-profile.md</c>。</summary>
+    public string Profile { get; set; } = "";
+
+    /// <summary>多 profile: 在游戏窗口标题后追加 profile 名(如 "吉星派对 · P2"),
+    /// 方便同时开多个实例时从任务栏 / Alt+Tab 分辨。默认 true; 只在配置了 profile 时生效,
+    /// 关掉只影响标题显示, 目录隔离照常。见加载器 <c>docs\多开-profile.md</c>。</summary>
+    public bool ProfileWindowTitle { get; set; } = true;
 }
